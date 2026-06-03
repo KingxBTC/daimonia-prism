@@ -301,18 +301,31 @@
       return String(value);
     }
 
+    // HTML 实体转义：仅用于流入 .innerHTML 的报告数据（被审计站点内容 / LLM 输出，
+    // 攻击面真实）。注意：textContent 路径不可走这里，否则页面会显示字面 &lt;。
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    // text() + 转义：innerHTML 路径专用（先做 fallback，再转义）。
+    function esc(value, fallback = "未提供") {
+      return escapeHtml(text(value, fallback));
+    }
+
     function pct(value) {
       const num = Number(value || 0);
       return `${Math.max(0, Math.min(100, num))}%`;
     }
 
     function metaItem(label, value) {
-      return `<div class="meta-item"><span class="label">${label}</span><span class="value">${text(value)}</span></div>`;
+      return `<div class="meta-item"><span class="label">${label}</span><span class="value">${esc(value)}</span></div>`;
     }
 
     function listItems(items) {
       const safe = Array.isArray(items) && items.length ? items : ["暂无"];
-      return safe.map((item) => `<li>${text(item)}</li>`).join("");
+      return safe.map((item) => `<li>${esc(item)}</li>`).join("");
     }
 
     function renderMeta() {
@@ -373,7 +386,7 @@
       svg.innerHTML = `<defs><linearGradient id="radarFill" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#12a4b6"/><stop offset="55%" stop-color="#7a4bd8"/><stop offset="100%" stop-color="#d8841f"/></linearGradient></defs>${grid}${axes}<polygon points="${area}" fill="url(#radarFill)" fill-opacity="0.26" stroke="#3157d5" stroke-width="3"/>${dots}`;
       document.getElementById("legend").innerHTML = DIMENSIONS.map((dim) => {
         const score = dims[dim.key] ? dims[dim.key].score : 0;
-        return `<div class="legend-item"><span class="swatch" style="background:${dim.color}"></span>${dim.key} ${score}</div>`;
+        return `<div class="legend-item"><span class="swatch" style="background:${dim.color}"></span>${dim.key} ${escapeHtml(score)}</div>`;
       }).join("");
     }
 
@@ -385,7 +398,7 @@
         return `<article class="dim-card" style="--dim-color:${dim.color}">
           <div class="dim-top">
             <div><div class="dim-code">${dim.key}</div><p class="dim-name">${dim.name} · ${weight}</p></div>
-            <div class="dim-score">${text(item.score, "--")}</div>
+            <div class="dim-score">${esc(item.score, "--")}</div>
           </div>
           <div class="bar" aria-hidden="true"><span style="width:${pct(item.score)}"></span></div>
           ${item.partial ? `<span class="partial">partial</span>` : ""}
@@ -397,17 +410,17 @@
     function renderFixes() {
       const fixes = Array.isArray(report.topFixes) ? report.topFixes : [];
       document.getElementById("fixes").innerHTML = fixes.map((fix, index) => `<article class="fix-card">
-        <div class="fix-priority">${text(fix.priority, index + 1)}</div>
-        <h3>[${text(fix.dimension)}] ${text(fix.action)}</h3>
-        <p>${text(fix.rationale)}</p>
-        <div class="tag-row"><span class="tag">${text(fix.method)}</span><span class="tag">effort: ${text(fix.effort)}</span></div>
+        <div class="fix-priority">${esc(fix.priority, index + 1)}</div>
+        <h3>[${esc(fix.dimension)}] ${esc(fix.action)}</h3>
+        <p>${esc(fix.rationale)}</p>
+        <div class="tag-row"><span class="tag">${esc(fix.method)}</span><span class="tag">effort: ${esc(fix.effort)}</span></div>
       </article>`).join("");
     }
 
     function renderDetails() {
       document.getElementById("not-evaluated").innerHTML = listItems(report.notEvaluated);
-      const vetoRows = (report.vetoes || []).map((veto) => `<div class="status-row"><strong>${text(veto.rule)}</strong><span class="status-pill ${veto.triggered ? "bad" : "ok"}">${veto.triggered ? "triggered" : "clear"}</span></div>`);
-      const couplingRows = (report.couplingFlags || []).map((flag) => `<div class="status-row"><strong>${text(flag.code)}</strong><span class="status-pill warn">${text(flag.note)}</span></div>`);
+      const vetoRows = (report.vetoes || []).map((veto) => `<div class="status-row"><strong>${esc(veto.rule)}</strong><span class="status-pill ${veto.triggered ? "bad" : "ok"}">${veto.triggered ? "triggered" : "clear"}</span></div>`);
+      const couplingRows = (report.couplingFlags || []).map((flag) => `<div class="status-row"><strong>${esc(flag.code)}</strong><span class="status-pill warn">${esc(flag.note)}</span></div>`);
       document.getElementById("flags").innerHTML = vetoRows.concat(couplingRows).join("") || `<div class="status-row"><strong>暂无</strong><span class="status-pill ok">clear</span></div>`;
       document.getElementById("sampled-pages").innerHTML = listItems(report.meta && report.meta.sampledPages);
       document.getElementById("cta-title").textContent = report.deepAuditRecommended ? "建议进入 Deep 审计" : "可暂不进入 Deep 审计";
