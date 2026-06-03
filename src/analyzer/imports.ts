@@ -6,6 +6,7 @@
 export type {
   CheckResult,
   DimensionId,
+  DimensionScore,
   SiteProfile,
   Market,
   TopFix,

@@ -94,7 +94,7 @@ export async function analyze(
   for (const d of DIMS) {
     const dimDefs = scoredDefs.filter(c => c.dimension === d);
     const dimResults = outcomes.filter(o => o.def.dimension === d).map(o => o.result);
-    dimensions[d] = assembleDimension(dimDefs, dimResults, ALWAYS_PARTIAL_DIMENSIONS.has(d as 'D3' | 'D4'));
+    dimensions[d] = assembleDimension(dimDefs, dimResults, ALWAYS_PARTIAL_DIMENSIONS.has(d));
   }
 
   const topFixes = buildTopFixes(dimensions, CHECKLIST);

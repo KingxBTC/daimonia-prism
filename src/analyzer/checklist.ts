@@ -10,6 +10,7 @@
  */
 
 import type { CheckDef, CheckContext, RuleOutcome } from './types.ts';
+import type { DimensionId } from './imports.ts';
 
 /** 常用：统计页面文本中数字/百分比/统计量出现次数。 */
 function countStats(text: string): number {
@@ -380,4 +381,4 @@ export const CHECKLIST: readonly CheckDef[] = [
 ];
 
 /** D3/D4 在 Light 档恒为 partial（earned/跨query 子项未评，PRD §5.1）。 */
-export const ALWAYS_PARTIAL_DIMENSIONS = new Set(['D3', 'D4'] as const);
+export const ALWAYS_PARTIAL_DIMENSIONS: ReadonlySet<DimensionId> = new Set(['D3', 'D4']);
