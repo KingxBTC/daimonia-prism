@@ -1,0 +1,20 @@
+{
+  "name": "daimonia-prism",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Prism（棱镜）— Daimonia GEO 审计工具",
+  "scripts": {
+    "test": "node --test 'tests/**/*.test.ts'",
+    "test:collector": "node --test 'tests/collector/*.test.ts'",
+    "typecheck": "tsc --noEmit",
+    "render": "node skill/render/cli.ts"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
