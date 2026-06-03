@@ -169,12 +169,17 @@ describe('buildScores — Scorer 装配（PRD §3/§4/§5.3）', () => {
   });
 });
 
-describe('auditLight / auditDeep — §8.2 接口签名占位', () => {
-  test('auditLight 未接线 → reject（依赖 T3/T4）', async () => {
-    await assert.rejects(
-      () => auditLight({ url: 'https://example.com', market: 'international' }),
-      /Collector|Analyzer|接线/,
-    );
+describe('auditLight / auditDeep — §8.2 接口签名', () => {
+  // auditLight 接线后「永不崩」契约：不可达 URL → resolve 成 error AuditReport（不抛）
+  test('auditLight：不可达 URL → resolve 成 error AuditReport（PRD §10 永不崩）', async () => {
+    const report = await auditLight({
+      url: 'https://no-such-domain-xyz-prism.invalid',
+      market: 'international',
+    });
+    assert.ok(report, '应返回 AuditReport，而非 throw');
+    assert.strictEqual(report.meta.error, 'unreachable', 'error 字段应为 unreachable');
+    assert.strictEqual(report.scores, undefined, '不可达报告不含 scores');
+    assert.ok(report.meta.errorHint, '应有排查提示');
   });
 
   test('auditDeep 未实现 → reject（Phase 3 预留）', async () => {
