@@ -15,6 +15,7 @@ import { DEEP_ONLY_NOT_EVALUATED } from '../core/scorer.ts';
 import { buildCheckResult, assembleDimension } from './aggregate.ts';
 import { inferProfile, heuristicClassification } from './profile.ts';
 import { buildTopFixes } from './topfixes.ts';
+import { buildChinaChecksFromRaw, chinaCheckDimension } from './china.ts';
 import type {
   AnalysisResult, AnalyzeDeps, CheckContext, CheckDef, DimensionAnalysis,
   LlmJudge, Rating, RuleOutcome,
@@ -95,6 +96,20 @@ export async function analyze(
     const dimDefs = scoredDefs.filter(c => c.dimension === d);
     const dimResults = outcomes.filter(o => o.def.dimension === d).map(o => o.result);
     dimensions[d] = assembleDimension(dimDefs, dimResults, ALWAYS_PARTIAL_DIMENSIONS.has(d));
+  }
+
+  // china 市场接入（PRD §6.3，T7）：market 含 china 时附加 china 专项 check。
+  // 这些 check 无对应 CheckDef（penalty=0），不参与 rawScore penalty 聚合——
+  // 符合 §6.3"额外判断 + 标注盲区 + 提示"定位，不重权核心 5 维分；
+  // 作为结构化标注进入对应维度 checks[]/issues[]，由渲染层在报告中呈现。
+  if (deps.market !== 'international') {
+    for (const c of buildChinaChecksFromRaw(raw, deps.market)) {
+      const dim = chinaCheckDimension(c.id);
+      dimensions[dim].checks.push(c);
+      if (c.status === 'fail' || c.status === 'partial') {
+        dimensions[dim].issues.unshift(`[china] ${c.evidence}`);
+      }
+    }
   }
 
   const topFixes = buildTopFixes(dimensions, CHECKLIST);
