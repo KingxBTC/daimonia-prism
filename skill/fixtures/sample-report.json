@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "url": "https://example.com",
+    "market": "international",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-03T10:00:00Z",
+    "durationMs": 84000,
+    "sampledPages": [
+      "https://example.com/",
+      "https://example.com/about",
+      "https://example.com/services/counseling"
+    ]
+  },
+  "profile": {
+    "domain": "example.com",
+    "businessType": "婚姻咨询服务",
+    "isYMYL": true,
+    "ymylCategory": "情感婚姻心理",
+    "nicheTier": "niche",
+    "siteScale": "100-1000",
+    "primaryLanguage": "zh-CN",
+    "geoMarket": "中国大陆",
+    "targetEngines": ["claude", "chatgpt"]
+  },
+  "scores": {
+    "total": 52,
+    "level": "L1",
+    "indicative": true,
+    "dimensions": {
+      "D1": {
+        "score": 60,
+        "weight": 0.2,
+        "partial": false,
+        "issues": ["schema.org 仅首页有，内容页缺 Article 标注"],
+        "checks": [
+          { "id": "D1.jsonld", "name": "JSON-LD/schema.org 抽取与校验", "tier": "L+D", "status": "partial", "evidence": "首页有 Organization，内容页无 Article", "scoreImpact": 0 }
+        ]
+      },
+      "D2": {
+        "score": 40,
+        "weight": 0.2,
+        "partial": false,
+        "issues": ["缺 /llms.txt（-10）", "FAQ 藏在长段落"],
+        "checks": [
+          { "id": "D2.llms_txt", "name": "/llms.txt 存在性与格式", "tier": "L+D", "status": "fail", "evidence": "GET /llms.txt → 404", "scoreImpact": -10 }
+        ]
+      },
+      "D3": {
+        "score": 45,
+        "weight": 0.25,
+        "partial": true,
+        "issues": ["作者无资质标注"],
+        "checks": []
+      },
+      "D4": {
+        "score": 50,
+        "weight": 0.25,
+        "partial": true,
+        "issues": ["结论模糊、无独家数据"],
+        "checks": []
+      },
+      "D5": {
+        "score": 70,
+        "weight": 0.1,
+        "partial": false,
+        "issues": [],
+        "checks": []
+      }
+    }
+  },
+  "vetoes": [
+    { "rule": "D5<60", "triggered": false },
+    { "rule": "YMYL_D3<40", "triggered": false }
+  ],
+  "couplingFlags": [
+    { "code": "D1xD2_mismatch", "note": "架构尚可但内容空" }
+  ],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "nicheWarning": "当前 indicative 分数对 Niche 主体易虚高，Deep 审计可能触发 L2 封顶",
+  "topFixes": [
+    { "priority": 1, "dimension": "D4", "method": "Statistics Addition", "action": "核心结论补具体数字/样本量/时间窗口", "rationale": "Aggarwal Top3，ROI 最高", "effort": "low" },
+    { "priority": 2, "dimension": "D2", "method": "llms.txt", "action": "新增 /llms.txt（H1+定位+核心页链接）", "rationale": "缺失 -10 分", "effort": "low" },
+    { "priority": 3, "dimension": "D3", "method": "E-E-A-T", "action": "作者页补资质/机构背景", "rationale": "YMYL 领域权威要求高", "effort": "mid" }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "YMYL + Niche 主体，站内分数 indicative，earned media 与跨 query 稳定性未评估，建议 Deep 审计定整改方向"
+}

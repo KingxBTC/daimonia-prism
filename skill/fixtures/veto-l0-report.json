@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "url": "https://csr-shell.example",
+    "market": "international",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-03T10:10:00Z",
+    "durationMs": 67000,
+    "sampledPages": ["https://csr-shell.example/"]
+  },
+  "profile": {
+    "domain": "csr-shell.example",
+    "businessType": "在线投资理财平台",
+    "isYMYL": true,
+    "ymylCategory": "金融投资",
+    "nicheTier": "mid",
+    "siteScale": "<100",
+    "primaryLanguage": "en",
+    "geoMarket": "国际",
+    "targetEngines": ["chatgpt", "perplexity"]
+  },
+  "scores": {
+    "total": 28,
+    "level": "L0",
+    "indicative": true,
+    "dimensions": {
+      "D1": { "score": 20, "weight": 0.2, "partial": false, "issues": ["CSR 空壳，view-source 无结构化内容"], "checks": [] },
+      "D2": { "score": 20, "weight": 0.2, "partial": false, "issues": ["首屏内容靠 JS 渲染，bot 抓取为空"], "checks": [] },
+      "D3": { "score": 20, "weight": 0.25, "partial": true, "issues": ["无 About、无作者资质、YMYL 金融无监管披露"], "checks": [] },
+      "D4": { "score": 40, "weight": 0.25, "partial": true, "issues": ["无可引用结论单元"], "checks": [] },
+      "D5": { "score": 40, "weight": 0.1, "partial": false, "issues": ["CWV 差、HTML 渲染模式为纯 CSR"], "checks": [] }
+    }
+  },
+  "vetoes": [
+    { "rule": "D5<60", "triggered": true },
+    { "rule": "YMYL_D3<40", "triggered": true }
+  ],
+  "couplingFlags": [
+    { "code": "csr_empty_html", "note": "view-source 无内容，需可执行 JS 抓取，Light 仅给 D5+渲染告警" }
+  ],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "nicheWarning": "当前 indicative 分数对 Niche 主体易虚高，Deep 审计可能触发 L2 封顶",
+  "topFixes": [
+    { "priority": 1, "dimension": "D5", "method": "SSR/预渲染", "action": "对核心内容页做 SSR 或预渲染，让 bot 抓到静态 HTML", "rationale": "CSR 空壳是一票否决根因，不解决其余整改无意义", "effort": "high" },
+    { "priority": 2, "dimension": "D3", "method": "E-E-A-T", "action": "金融 YMYL 补监管资质/牌照/风险披露", "rationale": "YMYL 金融领域权威门槛最高", "effort": "mid" }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "D5 一票否决 + YMYL 金融权威严重不足，结构性问题需先修 SSR 再做 Deep"
+}

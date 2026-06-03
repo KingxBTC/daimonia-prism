@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "url": "https://nonexistent.invalid",
+    "market": "international",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-03T10:05:00Z",
+    "durationMs": 31000,
+    "sampledPages": [],
+    "error": "unreachable",
+    "errorHint": "DNS 解析失败，已重试 https→http 仍不可达。请确认域名拼写、站点是否在线、是否需要内网/授权访问。"
+  },
+  "vetoes": [],
+  "couplingFlags": [],
+  "notEvaluated": [
+    "全部维度（站点不可达，未采集到任何数据）"
+  ],
+  "topFixes": [],
+  "deepAuditRecommended": false,
+  "deepAuditRationale": "站点不可达，无法审计。恢复可达后重试。"
+}
