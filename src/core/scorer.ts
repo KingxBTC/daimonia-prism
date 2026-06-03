@@ -3,7 +3,14 @@
  * 所有判断规则源自 PRD §3/§4/§5.3；渲染层只消费 AuditReport，不重判。
  */
 
-import type { DimensionId, DimensionScore, Level, Veto } from './types.ts';
+import type {
+  CouplingFlag,
+  DimensionId,
+  DimensionScore,
+  Level,
+  Scores,
+  Veto,
+} from './types.ts';
 
 export const DIMENSION_WEIGHTS: Record<DimensionId, number> = {
   D1: 0.20,
@@ -85,4 +92,100 @@ export function calculateTotal(
     };
   }
   return { total };
+}
+
+/**
+ * 应用一票否决（PRD §3.3/§4.2）：任意 veto triggered → 等级锁 L0。
+ * 与 checkVetoes 分离：checkVetoes 只判定，applyVetoes 负责把判定结果落到等级上。
+ */
+export function applyVetoes(level: Level, vetoes: Veto[]): Level {
+  return vetoes.some(v => v.triggered) ? 'L0' : level;
+}
+
+/**
+ * 维度耦合错配阈值：两维度分差 ≥ 此值（2 档）即判错配。
+ *
+ * ⚠️ 阈值为 PRD §3.3 的可执行化"暂定值"——方法论 geo_audit_standard.md 未给出精确数值。
+ * 机制（显式 flag）已按 PRD §5.3 落地；精确阈值待 T4/方法论复核后调整（见 issue 交接说明）。
+ */
+export const COUPLING_GAP_THRESHOLD = 40;
+/** D4×D2 micro 耦合的弱档阈值（≤ 此分视为偏弱）。 */
+export const COUPLING_WEAK_TIER = 40;
+
+/**
+ * 计算维度耦合 flag（PRD §3.3）。确定性、只读维度分，不做内容判断。
+ *  - D1×D2 错配：结构架构与内容质量显著背离（差距 ≥ COUPLING_GAP_THRESHOLD）。
+ *  - D4×D2 micro 耦合：micro 可读性弱（D2 低）拖累可引用单元（D4 低）。
+ *
+ * CSR 空壳等采集期 flag（csr_empty_html）由 Collector/错误处理注入，不在此计算。
+ */
+export function computeCouplingFlags(
+  dimensions: Partial<Record<DimensionId, DimensionScore>>,
+): CouplingFlag[] {
+  const flags: CouplingFlag[] = [];
+  const d1 = dimensions.D1?.score;
+  const d2 = dimensions.D2?.score;
+  const d4 = dimensions.D4?.score;
+
+  if (d1 != null && d2 != null && Math.abs(d1 - d2) >= COUPLING_GAP_THRESHOLD) {
+    flags.push({
+      code: 'D1xD2_mismatch',
+      note: d1 > d2 ? '架构尚可但内容空' : '内容质量高于结构承载，结构化标注待补',
+    });
+  }
+
+  if (d2 != null && d4 != null && d2 <= COUPLING_WEAK_TIER && d4 <= COUPLING_WEAK_TIER) {
+    flags.push({
+      code: 'D4xD2_micro',
+      note: 'micro 强调/语义偏弱，可引用单元难以被独立摘取',
+    });
+  }
+
+  return flags;
+}
+
+/** buildScores 返回的打分包：最终 Scores + 透明项（vetoes/coupling）。 */
+export interface ScoreBundle {
+  scores: Scores;
+  vetoes: Veto[];
+  couplingFlags: CouplingFlag[];
+}
+
+/**
+ * Scorer 装配（PRD §5.2 L-6 / §3/§4）—— 确定性聚合，不做内容判断。
+ *
+ * 步骤：
+ *  1. 防御性把各维度分 snapToTier 到 6 档（§3.1，Scorer 是 6 档不变量的唯一权威）。
+ *  2. 加权总分（§3.2）。
+ *  3. 等级（§4.1）后应用一票否决（§4.2）。
+ *  4. 计算耦合 flag（§3.3），合并外部注入的 flag（如 csr_empty_html）。
+ *
+ * Light 档总是 indicative=true（§3.2）。
+ *
+ * @param dimensions 五维度分（含 raw score；本函数负责 snap）。
+ * @param isYMYL     画像是否 YMYL（影响 YMYL_D3<40 veto）。
+ * @param extraCouplingFlags 采集/错误处理期注入的额外 flag。
+ */
+export function buildScores(
+  dimensions: Record<DimensionId, DimensionScore>,
+  isYMYL: boolean,
+  extraCouplingFlags: CouplingFlag[] = [],
+): ScoreBundle {
+  const ALL_DIMS: DimensionId[] = ['D1', 'D2', 'D3', 'D4', 'D5'];
+  const snapped = {} as Record<DimensionId, DimensionScore>;
+  for (const id of ALL_DIMS) {
+    const d = dimensions[id];
+    snapped[id] = { ...d, score: snapToTier(d.score) };
+  }
+
+  const { total } = calculateTotal(snapped);
+  const vetoes = checkVetoes(snapped, isYMYL);
+  const level = applyVetoes(calculateLevel(total), vetoes);
+  const couplingFlags = [...computeCouplingFlags(snapped), ...extraCouplingFlags];
+
+  return {
+    scores: { total, level, indicative: true, dimensions: snapped },
+    vetoes,
+    couplingFlags,
+  };
 }
