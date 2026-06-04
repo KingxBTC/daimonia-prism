@@ -111,7 +111,7 @@ const D5_sitemap: CheckDef = {
   tier: 'L', step: 'L2', penalty: 20, kind: 'rule',
   rule: (ctx): RuleOutcome => {
     const s = ctx.raw.sitemap;
-    if (!s.exists) return { rating: 'poor', evidence: '无 sitemap.xml' };
+    if (!s.exists) return { rating: 'poor', evidence: 'GET /sitemap.xml → 不存在（bot 需逐页爬取发现，收录效率低）' };
     if (s.totalUrlCount === 0) return { rating: 'partial', evidence: 'sitemap.xml 存在但为空' };
     return { rating: 'good', evidence: `sitemap.xml 存在，含 ${s.totalUrlCount} 个 URL` };
   },
@@ -144,7 +144,7 @@ const D1_jsonld: CheckDef = {
   tier: 'L', step: 'L3', penalty: 40, kind: 'rule',
   rule: (ctx): RuleOutcome => {
     const pagesWithLd = ctx.raw.pages.filter(p => p.jsonLd.length > 0);
-    if (pagesWithLd.length === 0) return { rating: 'poor', evidence: '全站无 JSON-LD/schema.org 标注' };
+    if (pagesWithLd.length === 0) return { rating: 'poor', evidence: `全站无 JSON-LD/schema.org 标注（已扫 ${ctx.raw.pages.length} 页，0 命中）` };
     if (pagesWithLd.length < ctx.raw.pages.length) {
       return { rating: 'partial', evidence: `仅 ${pagesWithLd.length}/${ctx.raw.pages.length} 个抽样页有 schema.org 标注` };
     }
@@ -215,7 +215,7 @@ const D2_faq: CheckDef = {
   rule: (ctx): RuleOutcome =>
     hasFaqSignal(ctx)
       ? { rating: 'good', evidence: '检测到 FAQ/Q&A 结构（利于 LLM 直接引用问答对）' }
-      : { rating: 'poor', evidence: '未检测到结构化 FAQ/Q&A 块' },
+      : { rating: 'poor', evidence: `已扫 ${ctx.raw.pages.length} 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构` },
   fix: { method: 'FAQ', action: '核心问题做结构化 FAQ 块（建议加 FAQPage schema）', effort: 'low' },
 };
 
@@ -306,7 +306,7 @@ const D3_about: CheckDef = {
     const aboutSignal = links.some(l => /about|company|who-we-are|关于|联系|contact|公司|团队|team/.test(l));
     const orgLd = ctx.raw.pages.some(p => p.jsonLd.some(b => /organization|localbusiness/i.test(JSON.stringify(b))));
     if (aboutSignal || orgLd) return { rating: 'good', evidence: '检测到 About/机构信息（链接或 Organization schema）' };
-    return { rating: 'poor', evidence: '未检测到 About/机构/联系信息' };
+    return { rating: 'poor', evidence: `已扫 ${links.length} 条内部链接 + ${ctx.raw.pages.length} 页 JSON-LD，未发现 About/机构页或 Organization schema` };
   },
   fix: { method: 'E-E-A-T', action: '补 About 页（机构背景/联系方式/Organization schema）', effort: 'low' },
 };
@@ -399,7 +399,7 @@ const D4_statistics: CheckDef = {
     const n = countStats(ctx.homepage.textContent);
     if (n >= 5) return { rating: 'good', evidence: `检测到 ${n} 处统计量/具体数字` };
     if (n >= 1) return { rating: 'partial', evidence: `仅 ${n} 处具体数字，统计支撑偏弱` };
-    return { rating: 'poor', evidence: '正文几乎无具体数字/统计支撑' };
+    return { rating: 'poor', evidence: '首页正文未检测到具体数字/统计量（0 处）' };
   },
   fix: { method: 'Statistics Addition', action: '核心结论补具体数字/样本量/时间窗口', effort: 'low' },
 };
@@ -413,7 +413,7 @@ const D4_citation: CheckDef = {
     const citeTags = (html.match(/<(cite|blockquote)\b/gi) ?? []).length;
     if (citeTags >= 1 || extLinks >= 5) return { rating: 'good', evidence: `检测到 ${citeTags} 处 cite/quote + ${extLinks} 处外链引用` };
     if (extLinks >= 1) return { rating: 'partial', evidence: `仅 ${extLinks} 处外链，引用支撑偏弱` };
-    return { rating: 'poor', evidence: '无外部引用/来源链接' };
+    return { rating: 'poor', evidence: `已扫 ${ctx.raw.pages.length} 页 HTML，未发现 cite/blockquote 标签或外部来源链接（0 处）` };
   },
   fix: { method: 'Citing Sources', action: '关键论点补权威来源链接/引用', effort: 'low' },
 };
