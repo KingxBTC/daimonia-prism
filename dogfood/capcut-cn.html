@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prism GEO 审计报告</title>
+  <style>
+    :root {
+      --bg: #f7f5f0;
+      --surface: #fffdf8;
+      --surface-2: #f0ece3;
+      --ink: #171717;
+      --muted: #62615d;
+      --line: #ded8cc;
+      --prism-cyan: #12a4b6;
+      --prism-blue: #3157d5;
+      --prism-violet: #7a4bd8;
+      --prism-rose: #c04777;
+      --prism-amber: #d8841f;
+      --ok: #237a56;
+      --warn: #a86412;
+      --bad: #a83f38;
+      --shadow: 0 24px 70px rgba(29, 25, 18, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --s1: 4px;
+      --s2: 8px;
+      --s3: 12px;
+      --s4: 16px;
+      --s5: 24px;
+      --s6: 32px;
+      --s7: 48px;
+      --s8: 64px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); line-height: 1.55; }
+    a { color: var(--prism-blue); overflow-wrap: anywhere; }
+    .page { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: var(--s6) 0 var(--s8); }
+    .shell { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+    .masthead { padding: var(--s6); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--s6); align-items: start; background:
+      linear-gradient(135deg, rgba(18, 164, 182, 0.10), rgba(122, 75, 216, 0.10) 45%, rgba(216, 132, 31, 0.08)),
+      var(--surface);
+    }
+    .eyebrow { margin: 0 0 var(--s3); color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(36px, 5vw, 64px); line-height: 1.02; letter-spacing: 0; }
+    .nowrap { white-space: nowrap; }
+    .subtitle { margin: var(--s4) 0 0; max-width: 720px; color: var(--muted); font-size: 16px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
+    .meta-item { padding: var(--s3); border: 1px solid rgba(23, 23, 23, 0.10); border-radius: var(--radius-sm); background: rgba(255, 253, 248, 0.72); min-width: 0; }
+    .label { display: block; color: var(--muted); font-size: 12px; font-weight: 700; margin-bottom: var(--s1); }
+    .value { display: block; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+
+    .overview { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr); gap: var(--s6); padding: var(--s6); border-bottom: 1px solid var(--line); }
+    .score-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--s6); background: #171717; color: #fffdf8; min-width: 0; }
+    .score-row { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+    .score { font-size: clamp(56px, 9vw, 96px); line-height: 0.95; font-weight: 800; }
+    .score-total { color: rgba(255, 253, 248, 0.72); font-size: 20px; font-weight: 700; }
+    .level { display: inline-flex; align-items: center; min-height: 32px; margin-top: var(--s3); padding: 0 var(--s3); border-radius: 999px; background: var(--prism-amber); color: #171717; font-size: 14px; font-weight: 800; }
+    .risk-list { margin: var(--s5) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s3); }
+    .risk-list li { padding-left: var(--s4); border-left: 3px solid var(--prism-amber); color: rgba(255, 253, 248, 0.86); }
+    .radar-panel { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--s5); background: linear-gradient(180deg, #fffdf8, #f8f4ea); min-width: 0; }
+    .section-head { display: flex; justify-content: space-between; gap: var(--s4); align-items: end; margin-bottom: var(--s4); }
+    .section-head h2 { margin: 0; font-size: 24px; line-height: 1.15; }
+    .section-head p { margin: var(--s1) 0 0; color: var(--muted); font-size: 14px; }
+    #radar { display: block; width: min(100%, 420px); aspect-ratio: 1; margin: 0 auto; }
+    .legend { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s2); margin-top: var(--s4); }
+    .legend-item { font-size: 12px; color: var(--muted); min-width: 0; }
+    .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: var(--s1); vertical-align: -1px; }
+
+    .section { padding: var(--s6); border-bottom: 1px solid var(--line); }
+    .dimensions { display: grid; grid-template-columns: repeat(5, minmax(190px, 1fr)); gap: var(--s4); }
+    .dim-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--s4); background: var(--surface); min-width: 0; }
+    .dim-top { display: flex; justify-content: space-between; gap: var(--s3); align-items: start; margin-bottom: var(--s3); }
+    .dim-code { font-weight: 800; font-size: 18px; }
+    .dim-name { margin: var(--s1) 0 0; color: var(--muted); font-size: 13px; }
+    .dim-score { font-size: 32px; font-weight: 800; line-height: 1; }
+    .bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin: var(--s3) 0 var(--s4); }
+    .bar span { display: block; height: 100%; border-radius: 999px; width: 0%; background: var(--dim-color, var(--prism-blue)); }
+    .issues { margin: 0; padding-left: 18px; color: var(--ink); font-size: 14px; }
+    .issues li + li { margin-top: var(--s2); }
+    .partial { display: inline-flex; align-items: center; min-height: 24px; padding: 0 var(--s2); border-radius: 999px; background: rgba(168, 100, 18, 0.14); color: var(--warn); font-size: 12px; font-weight: 800; }
+
+    .fixes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
+    .fix-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--s5); background: #171717; color: #fffdf8; min-width: 0; }
+    .fix-priority { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--prism-amber); color: #171717; font-weight: 900; margin-bottom: var(--s4); }
+    .fix-card h3 { margin: 0 0 var(--s3); font-size: 18px; line-height: 1.2; }
+    .fix-card p { margin: 0; color: rgba(255, 253, 248, 0.80); font-size: 14px; }
+    .tag-row { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s4); }
+    .tag { display: inline-flex; align-items: center; min-height: 26px; padding: 0 var(--s2); border: 1px solid rgba(255, 253, 248, 0.22); border-radius: 999px; color: rgba(255, 253, 248, 0.86); font-size: 12px; font-weight: 700; }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+    .detail-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--s5); background: var(--surface); min-width: 0; }
+    .detail-card h3 { margin: 0 0 var(--s3); font-size: 18px; }
+    .detail-card ul { margin: 0; padding-left: 18px; color: var(--muted); }
+    .detail-card li + li { margin-top: var(--s2); }
+    .status-list { display: grid; gap: var(--s2); }
+    .status-row { display: flex; justify-content: space-between; gap: var(--s3); padding: var(--s3); background: var(--surface-2); border-radius: var(--radius-sm); }
+    .status-row strong { overflow-wrap: anywhere; }
+    .status-pill { font-size: 12px; font-weight: 900; }
+    .status-pill.ok { color: var(--ok); }
+    .status-pill.warn { color: var(--warn); }
+    .status-pill.bad { color: var(--bad); }
+
+    .cta { display: grid; grid-template-columns: 1fr auto; gap: var(--s5); align-items: center; padding: var(--s6); background: linear-gradient(135deg, #171717, #29211b); color: #fffdf8; }
+    .cta h2 { margin: 0 0 var(--s2); font-size: 28px; line-height: 1.15; }
+    .cta p { margin: 0; color: rgba(255, 253, 248, 0.78); max-width: 760px; }
+    .cta-mark { border: 1px solid rgba(255, 253, 248, 0.20); border-radius: var(--radius-md); padding: var(--s4); color: var(--prism-amber); font-weight: 900; text-align: center; min-width: 136px; }
+    footer { padding: var(--s5) var(--s6); color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: var(--s4); flex-wrap: wrap; }
+
+    @media (max-width: 1100px) {
+      .dimensions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dimensions .dim-card:last-child { grid-column: span 2; }
+      .fixes { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 860px) {
+      .page { width: min(100% - 20px, 1180px); padding: var(--s3) 0 var(--s5); }
+      .masthead, .overview, .detail-grid, .cta { grid-template-columns: 1fr; }
+      .masthead, .overview, .section, .cta { padding: var(--s5); }
+      .meta-grid { grid-template-columns: 1fr; }
+      .legend { grid-template-columns: repeat(2, 1fr); }
+      .dimensions { grid-template-columns: 1fr; }
+      .dimensions .dim-card:last-child { grid-column: auto; }
+      .cta-mark { justify-self: start; }
+    }
+
+    @media print {
+      :root { --bg: #fff; --shadow: none; }
+      .page { width: 100%; padding: 0; }
+      .shell { border: 0; border-radius: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <article class="shell" aria-labelledby="report-title">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">Prism GEO Audit · Light · indicative</p>
+          <h1 id="report-title">Prism GEO <span class="nowrap">审计报告</span></h1>
+          <p class="subtitle" id="report-summary">本报告基于 AuditReport JSON 渲染，用于客户分享与存档。Light 结果为 indicative，Deep 审计后可能下调。</p>
+        </div>
+        <div class="meta-grid" id="meta-grid"></div>
+      </header>
+
+      <section class="overview" aria-label="总览">
+        <div class="score-card">
+          <span class="label">Total Score</span>
+          <div class="score-row">
+            <strong class="score" id="total-score">--</strong>
+            <span class="score-total">/100</span>
+          </div>
+          <span class="level" id="level">--</span>
+          <ul class="risk-list" id="risk-list"></ul>
+        </div>
+        <div class="radar-panel">
+          <div class="section-head">
+            <div>
+              <h2>五维雷达</h2>
+              <p>分数直接来自 `scores.dimensions`，不在渲染层重算。</p>
+            </div>
+          </div>
+          <svg id="radar" role="img" aria-label="D1 到 D5 五维评分雷达图"></svg>
+          <div class="legend" id="legend"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>维度卡片</h2>
+            <p>每张卡片显示分数、权重、partial 状态与主要问题。</p>
+          </div>
+        </div>
+        <div class="dimensions" id="dimensions"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2>Top 3 立即整改</h2>
+            <p>按报告 JSON 中 `topFixes` 顺序展示，方便客户直接行动。</p>
+          </div>
+        </div>
+        <div class="fixes" id="fixes"></div>
+      </section>
+
+      <section class="section">
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h3>本次未评估</h3>
+            <ul id="not-evaluated"></ul>
+          </div>
+          <div class="detail-card">
+            <h3>Veto / Coupling 透明项</h3>
+            <div class="status-list" id="flags"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="detail-card">
+          <h3>抽样页面</h3>
+          <ul id="sampled-pages"></ul>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div>
+          <h2 id="cta-title">建议进入 Deep 审计</h2>
+          <p id="cta-copy">Deep 审计包含多引擎实测引用率、earned media 调研与跨 query 稳定性验证。</p>
+        </div>
+        <div class="cta-mark">Daimonia<br>Deep Audit</div>
+      </section>
+
+      <footer>
+        <span id="footer-standard">Standard: --</span>
+        <span>Renderer: Prism standalone HTML v1</span>
+      </footer>
+    </article>
+  </main>
+
+  <script id="audit-report-data" type="application/json">
+{
+  "meta": {
+    "url": "https://www.capcut.cn",
+    "market": "china",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-04T06:47:43.958Z",
+    "durationMs": 16668,
+    "sampledPages": [
+      "https://www.capcut.cn/",
+      "https://www.capcut.cn/mobile_portal",
+      "https://www.capcut.cn/learning",
+      "https://www.capcut.cn/bussiness_inquiry"
+    ]
+  },
+  "profile": {
+    "domain": "www.capcut.cn",
+    "businessType": "剪映官网",
+    "isYMYL": false,
+    "nicheTier": "niche",
+    "siteScale": "\u003c100",
+    "primaryLanguage": "zh-CN",
+    "geoMarket": "中国大陆",
+    "targetEngines": [
+      "baidu",
+      "doubao",
+      "yuanbao",
+      "deepseek",
+      "qwen"
+    ]
+  },
+  "scores": {
+    "total": 37,
+    "level": "L0",
+    "indicative": true,
+    "dimensions": {
+      "D1": {
+        "score": 40,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "全站无 JSON-LD/schema.org 标注",
+          "（降级启发式）有多级标题，结构尚可，未经 LLM 细判"
+        ],
+        "checks": [
+          {
+            "id": "D1.jsonld_schema",
+            "name": "JSON-LD / schema.org 标注",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "全站无 JSON-LD/schema.org 标注",
+            "scoreImpact": -40
+          },
+          {
+            "id": "D1.heading_hierarchy",
+            "name": "H1-H4 层级一致性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "单一 H1 + 4 个标题层级清晰",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.nav_clarity",
+            "name": "章节树 / 导航清晰度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "（降级启发式）有多级标题，结构尚可，未经 LLM 细判",
+            "scoreImpact": -15
+          }
+        ]
+      },
+      "D2": {
+        "score": 20,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "[china] 盲区引擎（内容完全抓不到）：小红书点点(P3)。仅间接可达：豆包(P0)、腾讯元宝(P0)、腾讯混元(P2)。整改方向：豆包←douyin/toutiao；腾讯元宝←wechat_oa/wechat_channels；腾讯混元←wechat_oa/wechat_channels；小红书点点←xiaohongshu。",
+          "（降级启发式）疑似大段堆砌（平均段落过长）",
+          "未检测到结构化 FAQ/Q&A 块"
+        ],
+        "checks": [
+          {
+            "id": "D2.paragraph_list_table",
+            "name": "段落/列表/表格语义结构",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "（降级启发式）疑似大段堆砌（平均段落过长）",
+            "scoreImpact": -25
+          },
+          {
+            "id": "D2.faq_block",
+            "name": "FAQ / Q&A 块",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "未检测到结构化 FAQ/Q&A 块",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D2.micro_emphasis",
+            "name": "micro 强调节制度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "（降级启发式）micro 强调未经 LLM 细判，暂记 partial",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.self_contained",
+            "name": "self-contained 自足性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "（降级启发式）self-contained 未经 LLM 细判，暂记 partial",
+            "scoreImpact": -10
+          },
+          {
+            "id": "D2.css_stripped_readability",
+            "name": "删 CSS 可读性",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "文本/HTML 占比偏低（2.9%）",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.llms_txt",
+            "name": "/llms.txt 存在性与格式",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "/llms.txt 存在但格式不完整（缺 H1 或链接）",
+            "scoreImpact": -5
+          },
+          {
+            "id": "china.platform_reachability",
+            "name": "内容平台覆盖 vs LLM 可达性盲区（§6.3）",
+            "tier": "L",
+            "status": "partial",
+            "scoreImpact": -10,
+            "evidence": "盲区引擎（内容完全抓不到）：小红书点点(P3)。仅间接可达：豆包(P0)、腾讯元宝(P0)、腾讯混元(P2)。整改方向：豆包←douyin/toutiao；腾讯元宝←wechat_oa/wechat_channels；腾讯混元←wechat_oa/wechat_channels；小红书点点←xiaohongshu。"
+          }
+        ]
+      },
+      "D3": {
+        "score": 0,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "未检测到 About/机构/联系信息",
+          "（降级启发式）未经 LLM 确认作者资质，保守判 poor"
+        ],
+        "checks": [
+          {
+            "id": "D3.about_page",
+            "name": "About / 机构信息存在性",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "未检测到 About/机构/联系信息",
+            "scoreImpact": -25
+          },
+          {
+            "id": "D3.author_credentials",
+            "name": "作者 / 资质标注",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "（降级启发式）未经 LLM 确认作者资质，保守判 poor",
+            "scoreImpact": -30
+          },
+          {
+            "id": "D3.freshness",
+            "name": "内容时间新鲜度",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "未检测到内容时间信息",
+            "scoreImpact": -20
+          },
+          {
+            "id": "D3.transparency",
+            "name": "透明度（来源/披露/政策）",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "（降级启发式）透明度未经 LLM 细判，暂记 partial",
+            "scoreImpact": -12.5
+          }
+        ]
+      },
+      "D4": {
+        "score": 60,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "仅 1 处具体数字，统计支撑偏弱",
+          "（降级启发式）结论明确性未经 LLM 细判，暂记 partial"
+        ],
+        "checks": [
+          {
+            "id": "D4.statistics_usage",
+            "name": "Statistics 使用率（具体数字/样本）",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "仅 1 处具体数字，统计支撑偏弱",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D4.citation_usage",
+            "name": "Cite / 引用来源使用率",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "检测到 0 处 cite/quote + 21 处外链引用",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.conclusion_clarity",
+            "name": "结论明确性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "（降级启发式）结论明确性未经 LLM 细判，暂记 partial",
+            "scoreImpact": -12.5
+          },
+          {
+            "id": "D4.justification",
+            "name": "Justification 论证结构",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "（降级启发式）论证结构未经 LLM 细判，暂记 partial",
+            "scoreImpact": -10
+          }
+        ]
+      },
+      "D5": {
+        "score": 100,
+        "weight": 0.1,
+        "partial": true,
+        "issues": [
+          "CWV 未取到（PageSpeed API 失败）"
+        ],
+        "checks": [
+          {
+            "id": "D5.robots_llm_bots",
+            "name": "robots.txt 对 LLM bot 的允许策略",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "robots.txt 未禁止任何已知 LLM bot（0 个有显式条目）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.https",
+            "name": "HTTPS / 证书",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全站 HTTPS",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.render_mode",
+            "name": "view-source 渲染模式（SSR vs CSR 空壳）",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "view-source 含实质内容（SSR/SSG，bot 可直接抓取）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.sitemap",
+            "name": "sitemap.xml 存在 + 覆盖",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "sitemap.xml 存在，含 1 个 URL",
+            "scoreImpact": 0
+          },
+          {
+            "id": "china.robots_cn_bots",
+            "name": "robots.txt 国内 bot 策略核查（§6.3）",
+            "tier": "L",
+            "status": "pass",
+            "scoreImpact": 0,
+            "evidence": "未发现封禁目标引擎相关国内 bot（已核查 Baiduspider / Bytespider / Sogou web spider / YisouSpider）。 注：平台原生内容（公众号/抖音/视频号）走平台索引，不受 robots 控制（§6.3 D5）。DeepSeek（博查）/ Kimi（自建/Bing 系）无稳定公开中文 bot UA，其开放 web 可达性依赖通用爬虫（Bingbot/Googlebot），robots 核查请并看国际 bot 清单。"
+          },
+          {
+            "id": "D5.cwv",
+            "name": "Core Web Vitals（PageSpeed Insights）",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "PageSpeed API 失败，CWV 未取到（PSI fetch 失败: fetch failed）",
+            "scoreImpact": 0
+          }
+        ]
+      }
+    }
+  },
+  "vetoes": [
+    {
+      "rule": "D5\u003c60",
+      "triggered": false
+    },
+    {
+      "rule": "YMYL_D3\u003c40",
+      "triggered": false
+    }
+  ],
+  "couplingFlags": [],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "nicheWarning": "当前 indicative 分数对 Niche 主体易虚高，Deep 审计可能触发 L2 封顶",
+  "topFixes": [
+    {
+      "priority": 1,
+      "dimension": "D4",
+      "method": "Statistics Addition",
+      "action": "核心结论补具体数字/样本量/时间窗口",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "low"
+    },
+    {
+      "priority": 2,
+      "dimension": "D4",
+      "method": "Quotation Addition",
+      "action": "段首给结论句（可被直接引用的明确表述）",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "mid"
+    },
+    {
+      "priority": 3,
+      "dimension": "D2",
+      "method": "llms.txt",
+      "action": "新增 /llms.txt（H1 + 站点定位 + 核心页链接）",
+      "rationale": "缺失明确 -10 分，零成本快赢",
+      "effort": "low"
+    }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "Niche 主体，Light 分易虚高，Deep 可能触发封顶；综合得分偏低，整改空间大，Deep 可精准定位优先项；D3 earned media 覆盖度 + D4 跨 query 稳定性未评，需 Deep 获得完整分数"
+}
+  </script>
+
+  <script>
+    const DIMENSIONS = [
+      { key: "D1", name: "结构化语义 + 宏观架构", color: "#12a4b6" },
+      { key: "D2", name: "内容 AI 可读性", color: "#3157d5" },
+      { key: "D3", name: "权威信号", color: "#7a4bd8" },
+      { key: "D4", name: "可引用性", color: "#c04777" },
+      { key: "D5", name: "技术抓取基建", color: "#d8841f" }
+    ];
+
+    const dataNode = document.getElementById("audit-report-data");
+    const report = JSON.parse(dataNode.textContent);
+
+    function text(value, fallback = "未提供") {
+      if (value === null || value === undefined || value === "") return fallback;
+      return String(value);
+    }
+
+    // HTML 实体转义：仅用于流入 .innerHTML 的报告数据（被审计站点内容 / LLM 输出，
+    // 攻击面真实）。注意：textContent 路径不可走这里，否则页面会显示字面 &lt;。
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    // text() + 转义：innerHTML 路径专用（先做 fallback，再转义）。
+    function esc(value, fallback = "未提供") {
+      return escapeHtml(text(value, fallback));
+    }
+
+    function pct(value) {
+      const num = Number(value || 0);
+      return `${Math.max(0, Math.min(100, num))}%`;
+    }
+
+    function metaItem(label, value) {
+      return `<div class="meta-item"><span class="label">${label}</span><span class="value">${esc(value)}</span></div>`;
+    }
+
+    function listItems(items) {
+      const safe = Array.isArray(items) && items.length ? items : ["暂无"];
+      return safe.map((item) => `<li>${esc(item)}</li>`).join("");
+    }
+
+    function renderMeta() {
+      const meta = report.meta || {};
+      const profile = report.profile || {};
+      document.getElementById("meta-grid").innerHTML = [
+        metaItem("站点", meta.url),
+        metaItem("市场", meta.market),
+        metaItem("业务类型", profile.businessType),
+        metaItem("审计时间", meta.timestamp ? new Date(meta.timestamp).toLocaleString("zh-CN") : "未提供"),
+        metaItem("标准", meta.standardVersion),
+        metaItem("Prism", meta.prismVersion)
+      ].join("");
+      document.getElementById("footer-standard").textContent = `Standard: ${text(meta.standardVersion)}`;
+    }
+
+    function renderOverview() {
+      const scores = report.scores || {};
+      document.getElementById("total-score").textContent = text(scores.total, "--");
+      document.getElementById("level").textContent = `${text(scores.level, "--")} · ${scores.indicative ? "indicative" : "final"}`;
+      const riskItems = [];
+      if (report.nicheWarning) riskItems.push(report.nicheWarning);
+      (report.vetoes || []).filter((v) => v.triggered).forEach((v) => riskItems.push(`触发 veto: ${v.rule}`));
+      (report.couplingFlags || []).forEach((flag) => riskItems.push(`${flag.code}: ${flag.note}`));
+      if (!riskItems.length) riskItems.push("未触发一票否决；仍需结合未评估项看待 Light 结论。");
+      document.getElementById("risk-list").innerHTML = listItems(riskItems);
+      document.getElementById("report-summary").textContent = `${text(report.profile && report.profile.domain, report.meta && report.meta.url)} · ${text(report.meta && report.meta.auditTier, "light")} 审计 · ${text(report.scores && report.scores.level, "L?")}。Light 结果为 indicative，Deep 审计后可能下调。`;
+    }
+
+    function radarPoint(index, value, radius, center) {
+      const angle = -Math.PI / 2 + (index * 2 * Math.PI / DIMENSIONS.length);
+      const r = radius * (Number(value || 0) / 100);
+      return [center + Math.cos(angle) * r, center + Math.sin(angle) * r];
+    }
+
+    function renderRadar() {
+      const svg = document.getElementById("radar");
+      const size = 420;
+      const center = size / 2;
+      const radius = 150;
+      const dims = report.scores && report.scores.dimensions ? report.scores.dimensions : {};
+      const values = DIMENSIONS.map((dim) => dims[dim.key] ? dims[dim.key].score : 0);
+      const grid = [20, 40, 60, 80, 100].map((level) => {
+        const pts = DIMENSIONS.map((_, i) => radarPoint(i, level, radius, center).join(",")).join(" ");
+        return `<polygon points="${pts}" fill="none" stroke="#ded8cc" stroke-width="1"/>`;
+      }).join("");
+      const axes = DIMENSIONS.map((dim, i) => {
+        const [x, y] = radarPoint(i, 100, radius, center);
+        const [lx, ly] = radarPoint(i, 115, radius, center);
+        return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="#ded8cc" stroke-width="1"/><text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="#62615d" font-size="13" font-weight="700">${dim.key}</text>`;
+      }).join("");
+      const area = values.map((value, i) => radarPoint(i, value, radius, center).join(",")).join(" ");
+      const dots = values.map((value, i) => {
+        const [x, y] = radarPoint(i, value, radius, center);
+        return `<circle cx="${x}" cy="${y}" r="5" fill="${DIMENSIONS[i].color}" stroke="#fffdf8" stroke-width="2"/>`;
+      }).join("");
+      svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+      svg.innerHTML = `<defs><linearGradient id="radarFill" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#12a4b6"/><stop offset="55%" stop-color="#7a4bd8"/><stop offset="100%" stop-color="#d8841f"/></linearGradient></defs>${grid}${axes}<polygon points="${area}" fill="url(#radarFill)" fill-opacity="0.26" stroke="#3157d5" stroke-width="3"/>${dots}`;
+      document.getElementById("legend").innerHTML = DIMENSIONS.map((dim) => {
+        const score = dims[dim.key] ? dims[dim.key].score : 0;
+        return `<div class="legend-item"><span class="swatch" style="background:${dim.color}"></span>${dim.key} ${escapeHtml(score)}</div>`;
+      }).join("");
+    }
+
+    function renderDimensions() {
+      const dims = report.scores && report.scores.dimensions ? report.scores.dimensions : {};
+      document.getElementById("dimensions").innerHTML = DIMENSIONS.map((dim) => {
+        const item = dims[dim.key] || {};
+        const weight = item.weight !== undefined ? `${Math.round(Number(item.weight) * 100)}%` : "--";
+        return `<article class="dim-card" style="--dim-color:${dim.color}">
+          <div class="dim-top">
+            <div><div class="dim-code">${dim.key}</div><p class="dim-name">${dim.name} · ${weight}</p></div>
+            <div class="dim-score">${esc(item.score, "--")}</div>
+          </div>
+          <div class="bar" aria-hidden="true"><span style="width:${pct(item.score)}"></span></div>
+          ${item.partial ? `<span class="partial">partial</span>` : ""}
+          <ul class="issues">${listItems(item.issues)}</ul>
+        </article>`;
+      }).join("");
+    }
+
+    function renderFixes() {
+      const fixes = Array.isArray(report.topFixes) ? report.topFixes : [];
+      document.getElementById("fixes").innerHTML = fixes.map((fix, index) => `<article class="fix-card">
+        <div class="fix-priority">${esc(fix.priority, index + 1)}</div>
+        <h3>[${esc(fix.dimension)}] ${esc(fix.action)}</h3>
+        <p>${esc(fix.rationale)}</p>
+        <div class="tag-row"><span class="tag">${esc(fix.method)}</span><span class="tag">effort: ${esc(fix.effort)}</span></div>
+      </article>`).join("");
+    }
+
+    function renderDetails() {
+      document.getElementById("not-evaluated").innerHTML = listItems(report.notEvaluated);
+      const vetoRows = (report.vetoes || []).map((veto) => `<div class="status-row"><strong>${esc(veto.rule)}</strong><span class="status-pill ${veto.triggered ? "bad" : "ok"}">${veto.triggered ? "triggered" : "clear"}</span></div>`);
+      const couplingRows = (report.couplingFlags || []).map((flag) => `<div class="status-row"><strong>${esc(flag.code)}</strong><span class="status-pill warn">${esc(flag.note)}</span></div>`);
+      document.getElementById("flags").innerHTML = vetoRows.concat(couplingRows).join("") || `<div class="status-row"><strong>暂无</strong><span class="status-pill ok">clear</span></div>`;
+      document.getElementById("sampled-pages").innerHTML = listItems(report.meta && report.meta.sampledPages);
+      document.getElementById("cta-title").textContent = report.deepAuditRecommended ? "建议进入 Deep 审计" : "可暂不进入 Deep 审计";
+      document.getElementById("cta-copy").textContent = report.deepAuditRecommended ? text(report.deepAuditRationale) : "站内 Light 信号较稳，但客户交付前仍建议按业务风险决定是否抽检 Deep 项。";
+    }
+
+    renderMeta();
+    renderOverview();
+    renderRadar();
+    renderDimensions();
+    renderFixes();
+    renderDetails();
+  </script>
+</body>
+</html>
