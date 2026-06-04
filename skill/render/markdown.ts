@@ -15,6 +15,9 @@ import {
 
 const EFFORT_CN: Record<string, string> = { low: '低', mid: '中', high: '高' };
 
+/** CheckResult.status → 扣分明细中文标签（only fail/partial 进入明细）。 */
+const STATUS_CN: Record<string, string> = { fail: '未达标', partial: '部分达标' };
+
 /** 多个 issue 合并为一行表格单元（markdown 表格不能含裸 `|` 和换行）。 */
 function joinIssues(issues: string[]): string {
   if (!issues || issues.length === 0) return '—';
@@ -73,6 +76,31 @@ export function renderMarkdown(report: AuditReport): string {
     lines.push(
       `| ${meta.label} | ${d.score} | ${meta.weightPct} | ${joinIssues(d.issues)} |`,
     );
+  }
+  lines.push('');
+
+  // 扣分明细（为什么扣分）—— 逐项展示 fail/partial 检查的客观依据（Track C / I4）
+  lines.push('## 🔻 扣分明细（为什么扣分）');
+  lines.push(
+    '> 逐项列出每个未达标/部分达标检查的客观依据（扫了哪些页/文件、命中/未命中），扣分有据可查。',
+  );
+  let anyDeduction = false;
+  for (const id of DIMENSION_ORDER) {
+    const d = s.dimensions[id];
+    const flagged = d.checks
+      .filter((c) => c.status === 'fail' || c.status === 'partial')
+      .sort((a, b) => (a.status === 'fail' ? 0 : 1) - (b.status === 'fail' ? 0 : 1));
+    if (flagged.length === 0) continue;
+    anyDeduction = true;
+    lines.push('');
+    lines.push(`### ${DIMENSION_META[id].label}`);
+    for (const c of flagged) {
+      lines.push(`- **${c.name}** · ${STATUS_CN[c.status] ?? c.status}：${c.evidence}`);
+    }
+  }
+  if (!anyDeduction) {
+    lines.push('');
+    lines.push('（本次各检查项均达标，无扣分明细）');
   }
   lines.push('');
 
