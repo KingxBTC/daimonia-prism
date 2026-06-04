@@ -58,6 +58,49 @@ indicative 评分报告 + Top3 整改清单，双出：**对话内 markdown** + 
 
 ---
 
+## 2.5 宿主 agent 当裁判（agent-judge 两遍式，DAI-1328）
+
+D1–D5 中的 **llm 型检查项**（内容质量类：导航清晰度 / 段落结构 / self-contained / 作者资质 /
+透明度 / 结论明确性 / Justification 等）需要**读内容做判断**。skill 形态**无 Anthropic API
+key**——由**宿主 agent（正在跑本 skill 的你）当裁判**，分两遍跑。**不接 judge 时这些项全部走
+固定常量兜底，暖情/abel 这类站会判不出区分**（见 `docs/iteration-light-discrimination.md` §1），
+所以正式审计**必须走两遍式**，不要只跑无 judge 的渲染路径。
+
+**第一遍 —— 导出 prompts**（runner 跑一遍采集 + 分析，把所有 llm 项的判断指令导出）：
+
+```bash
+node skill/run-audit.ts collect <url> [--market international|china|both] --out /tmp/prism-prompts.json
+```
+
+`/tmp/prism-prompts.json` 形如 `{ url, market, expectedCheckIds:[...], checks:[{checkId,dimension,name,instruction,context}, ...] }`。
+
+**第二遍 —— 逐项判定，写回 verdicts**：宿主 agent 读 `prompts.json`，**对每一条 `checks[]`**，
+按 `instruction` 读 `context`（页面节选）给出评级，写成一个文件 `/tmp/prism-verdicts.json`：
+
+```json
+{ "verdicts": [
+  { "checkId": "D1.nav_clarity", "rating": "good",    "evidence": "章节标题自解释，按主题分块（H2: 产品/方案/客户）" },
+  { "checkId": "D3.author_credentials", "rating": "partial", "evidence": "有作者署名，未见资质/机构背书" }
+] }
+```
+
+- `rating ∈ good | partial | poor | na`（评级语义见各项 `instruction`）。
+- **必须覆盖 `expectedCheckIds` 全部项**；缺项会在第三遍降级为启发式兜底（runner 会 warn）。
+- `evidence` 写扎实（扫了什么、命中/未命中的客观事实）——直接进报告，是归因可信度的来源（§7.2）。
+
+**第三遍 —— 产报告**（judge 从 verdicts 文件取，产 JSON + md + HTML）：
+
+```bash
+node skill/run-audit.ts report <url> --verdicts /tmp/prism-verdicts.json [--market ...] --out-dir <dir>
+```
+
+写出 `<host>.json`（真源）/ `.md`（回显进对话）/ `.html`（可分享）。`--market` 三遍保持一致。
+
+> 接线契约：两遍都只调 `auditLight(input, {judge})`（不动 core 三段解耦）。`web` 形态用
+> API-key judge 走同一注入点（DAI-1325 拍板 #2，I5 实现）。
+
+---
+
 ## 3. 打分规则速查（PRD §5.3，确定性，渲染层不重判）
 
 - **单维度 6 档**：100/80/60/40/20/0，核心项加权均后**向下就近档**（宁低勿高）。
@@ -130,12 +173,17 @@ report 的 `standardVersion`。
 ```
 skill/
 ├── SKILL.md                  # 本文件：编排 + 参数 + 进度 + 渲染调用 + 收尾
+├── run-audit.ts              # agent-judge 两遍式 runner（collect / report，DAI-1328）
+├── judge/
+│   ├── recording-judge.ts    # 第一遍：注入 auditLight 收集所有 llm prompt
+│   └── from-file.ts          # 第三遍：verdicts.json → LlmJudge 适配器
 ├── render/
 │   ├── spec.ts               # 维度标签 / 等级描述 / 关键风险派生（共享，纯函数）
 │   ├── markdown.ts           # renderMarkdown(report) → §7.3 对话内 md
 │   ├── html.ts               # renderHtml(report)     → §7.5 自包含 HTML（SVG 雷达）
-│   └── cli.ts                # 读 AuditReport JSON → 写 .md + .html
+│   └── cli.ts                # 读 AuditReport JSON → 写 .md + .html（无 judge 路径）
 └── fixtures/                 # 渲染验证样例（normal / veto-L0 / error）
 src/core/types.ts             # AuditReport 数据契约（与 T2 共享）
+tests/judge/                  # judge-from-file / recording-judge / 接线验收单测（node:test）
 tests/                        # render-markdown / render-html 单测（node:test，零依赖）
 ```
