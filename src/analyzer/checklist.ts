@@ -33,6 +33,25 @@ function hasFaqSignal(ctx: CheckContext): boolean {
   return faqWord && qMarks >= 2;
 }
 
+// ── I3（DAI-1330）heuristic 兜底地板：headless/无 judge 路径的区分力 ──
+
+/** 英文月份名（用于自然语言日期，含缩写 + 句点变体）。 */
+const MONTH_RE = 'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+
+/**
+ * 自然语言英文日期：'January 30, 2025' / 'Jan. 30 2025' / '30 January 2025'。
+ * 补 D3.freshness 原 numeric-only 正则的盲区（anthropic 误判根因，DAI-1330）。
+ */
+const NL_DATE_RE = new RegExp(
+  `\\b(?:(?:${MONTH_RE})\\.?\\s+\\d{1,2},?\\s+20[12]\\d|\\d{1,2}\\s+(?:${MONTH_RE})\\.?,?\\s+20[12]\\d)\\b`,
+  'i',
+);
+
+/** 聚合全部抽样页的纯文本（兜底启发式跨页扫描用）。 */
+function allText(ctx: CheckContext): string {
+  return ctx.raw.pages.map(p => p.textContent).join('\n');
+}
+
 // ─────────────────────────────────────────────────────────────
 // D5 技术抓取基建（L-2，完整可评，penalty 合计 100）
 // ─────────────────────────────────────────────────────────────
@@ -218,7 +237,30 @@ const D2_selfcontained: CheckDef = {
     instruction: '判断段落是否 self-contained（不依赖上下文/图片即可被单独引用）。good=多数段落自足；partial=部分依赖上下文；poor=高度依赖上下文/图片。',
     context: ctx.homepage.textContent.slice(0, 2000),
   }),
-  fallback: (): RuleOutcome => ({ rating: 'partial', evidence: '（降级启发式）self-contained 未经 LLM 细判，暂记 partial' }),
+  fallback: (ctx): RuleOutcome => {
+    const text = ctx.homepage.textContent;
+    // CJK 句间无空格，按句末标点本身切分（英文句点需后接空白以免误切小数 120.5）
+    const sentences = text
+      .split(/[。！？!?]+|\.\s+|\n+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 8);
+    if (sentences.length < 4) {
+      return { rating: 'poor', evidence: '（降级启发式）正文句子过少，难以独立成段引用' };
+    }
+    // 指代开头句（裸代词起手 = 依赖上下文）密度越低，自足性越好
+    const refOpener = /^(?:this|that|these|those|it|they|he|she|here|该|此|这|那|它|他|她|其)\b/i;
+    const dependent = sentences.filter(s => refOpener.test(s)).length;
+    const ratio = dependent / sentences.length;
+    const headings = ctx.homepage.headings.length;
+    const pct = (ratio * 100).toFixed(0);
+    if (ratio < 0.12 && headings >= 3) {
+      return { rating: 'good', evidence: `（降级启发式）指代开头句占比 ${pct}%、${headings} 个标题分块，段落自足性较好` };
+    }
+    if (ratio > 0.3) {
+      return { rating: 'poor', evidence: `（降级启发式）指代开头句占比 ${pct}%，段落高度依赖上下文` };
+    }
+    return { rating: 'partial', evidence: `（降级启发式）指代开头句占比 ${pct}%，自足性中等` };
+  },
   fix: { method: '自足改写', action: '关键段落改写为可独立引用（补足主语/背景）', effort: 'mid' },
 };
 
@@ -276,7 +318,23 @@ const D3_author: CheckDef = {
     instruction: `判断内容是否标注作者及其资质/机构背景（E-E-A-T 的 Expertise/Authoritativeness）。${ctx.profile.isYMYL ? 'YMYL 领域对权威要求高。' : ''}good=有明确作者+资质；partial=有作者无资质；poor=无作者署名。`,
     context: ctx.homepage.textContent.slice(0, 1500),
   }),
-  fallback: (): RuleOutcome => ({ rating: 'poor', evidence: '（降级启发式）未经 LLM 确认作者资质，保守判 poor' }),
+  fallback: (ctx): RuleOutcome => {
+    const ldStr = ctx.raw.pages.map(p => JSON.stringify(p.jsonLd)).join('').toLowerCase();
+    const schemaAuthor = /"@type"\s*:\s*"person"|"author"\s*:/.test(ldStr);
+    const text = allText(ctx);
+    // 署名：英文 "By Firstname Lastname" 或中文作者/撰文标注（收紧避免 "created by AI" 误命中）
+    const byline = /\bby\s+[A-Z][a-z]+\s+[A-Z][a-z]+\b/.test(text)
+      || /作者[：:　\s]|撰文[：:　\s]|本文作者|供稿[：:　\s]/.test(text);
+    const credential = /\b(?:ph\.?d|m\.?d|professor|researcher|fellow)\b/i.test(text)
+      || /博士|教授|研究员|主任医师|高级工程师|注册.{0,4}师/.test(text);
+    if (schemaAuthor && (byline || credential)) {
+      return { rating: 'good', evidence: '（降级启发式）检测到 schema author/Person + 署名或资质词' };
+    }
+    if (schemaAuthor || byline) {
+      return { rating: 'partial', evidence: '（降级启发式）检测到署名/作者标注，未确认资质背景' };
+    }
+    return { rating: 'poor', evidence: '（降级启发式）未检测到作者署名/资质标注' };
+  },
   fix: { method: 'E-E-A-T', action: '作者页补资质/机构背景/外部权威背书', effort: 'mid' },
 };
 
@@ -286,10 +344,15 @@ const D3_freshness: CheckDef = {
   rule: (ctx): RuleOutcome => {
     const dateLd = ctx.raw.pages.some(p =>
       p.jsonLd.some(b => /datepublished|datemodified/i.test(JSON.stringify(b))));
-    const dateText = ctx.raw.pages.some(p => /20[12]\d[-/年.]\d{1,2}/.test(p.textContent));
-    if (dateLd) return { rating: 'good', evidence: '页面含 datePublished/dateModified 标注' };
-    if (dateText) return { rating: 'partial', evidence: '正文有日期但无结构化时间标注' };
-    return { rating: 'poor', evidence: '未检测到内容时间信息' };
+    if (dateLd) return { rating: 'good', evidence: '页面含 datePublished/dateModified 结构化时间标注' };
+    // 数字格式（2025-01 / 2025年1）+ 英文自然语言（January 30, 2025）双扫，修 anthropic 误判
+    const numericDate = ctx.raw.pages.some(p => /20[12]\d[-/年.]\d{1,2}/.test(p.textContent));
+    const nlDate = ctx.raw.pages.some(p => NL_DATE_RE.test(p.textContent));
+    if (numericDate || nlDate) {
+      const fmt = nlDate && !numericDate ? '英文自然语言日期' : '数字日期';
+      return { rating: 'partial', evidence: `正文含${fmt}但无结构化时间标注` };
+    }
+    return { rating: 'poor', evidence: '未检测到内容时间信息（已扫数字与英文自然语言日期）' };
   },
   fix: { method: '时间标注', action: '补 datePublished/dateModified 结构化时间', effort: 'low' },
 };
@@ -301,7 +364,22 @@ const D3_transparency: CheckDef = {
     instruction: '判断内容透明度：是否标注信息来源、利益披露、隐私/服务政策等。good=透明充分；partial=部分；poor=无。',
     context: ctx.homepage.textContent.slice(0, 1500),
   }),
-  fallback: (): RuleOutcome => ({ rating: 'partial', evidence: '（降级启发式）透明度未经 LLM 细判，暂记 partial' }),
+  fallback: (ctx): RuleOutcome => {
+    const haystack = [
+      ...ctx.raw.pages.flatMap(p => p.internalLinks),
+      allText(ctx),
+    ].join('\n').toLowerCase();
+    const signals: Record<string, boolean> = {
+      隐私: /privacy|隐私/.test(haystack),
+      条款: /terms|服务条款|用户协议|使用条款/.test(haystack),
+      披露: /disclosure|信息披露|利益相关|affiliate/.test(haystack),
+      cookie政策: /cookie[\s\-]?(?:policy|notice|政策|声明)/.test(haystack),
+    };
+    const hits = Object.entries(signals).filter(([, v]) => v).map(([k]) => k);
+    if (hits.length >= 2) return { rating: 'good', evidence: `（降级启发式）检测到透明度信号：${hits.join('、')}` };
+    if (hits.length === 1) return { rating: 'partial', evidence: `（降级启发式）仅检测到 ${hits[0]} 链接` };
+    return { rating: 'poor', evidence: '（降级启发式）未检测到隐私/条款/披露等透明度信号' };
+  },
   fix: { method: '透明披露', action: '补来源标注/利益披露/隐私政策链接', effort: 'low' },
 };
 
@@ -347,7 +425,21 @@ const D4_conclusion: CheckDef = {
     instruction: '判断内容是否结论先行、明确可引用（LLM 易摘出一句话答案）。good=结论清晰先行；partial=结论模糊/埋在中间；poor=无明确结论。',
     context: ctx.homepage.textContent.slice(0, 2000),
   }),
-  fallback: (): RuleOutcome => ({ rating: 'partial', evidence: '（降级启发式）结论明确性未经 LLM 细判，暂记 partial' }),
+  fallback: (ctx): RuleOutcome => {
+    const text = ctx.homepage.textContent;
+    const head = text.slice(0, 600);
+    const summaryBlock = /tl;?dr|摘要|概要|key\s+takeaways?|in\s+summary|一句话|核心结论|本文要点/i.test(text);
+    // 结论先行：摘要/要点/结论标志出现在正文开头区
+    const leadConclusion = /综上|总之|结论|要点|takeaway|summary/i.test(head);
+    const concluding = /因此|综上|总之|总的来说|总而言之|结论是|therefore|in conclusion|to sum up|bottom line/i.test(text);
+    if (summaryBlock || leadConclusion) {
+      return { rating: 'good', evidence: '（降级启发式）检测到摘要/要点/结论先行块' };
+    }
+    if (concluding) {
+      return { rating: 'partial', evidence: '（降级启发式）含结论性连接词但未结论先行' };
+    }
+    return { rating: 'poor', evidence: '（降级启发式）未检测到摘要块或明确结论标志' };
+  },
   fix: { method: 'Quotation Addition', action: '段首给结论句（可被直接引用的明确表述）', effort: 'mid' },
 };
 
@@ -358,7 +450,19 @@ const D4_justification: CheckDef = {
     instruction: '判断论点是否有论证结构（论点-论据-依据）。good=论证完整；partial=部分缺依据；poor=断言无支撑。',
     context: ctx.homepage.textContent.slice(0, 2000),
   }),
-  fallback: (): RuleOutcome => ({ rating: 'partial', evidence: '（降级启发式）论证结构未经 LLM 细判，暂记 partial' }),
+  fallback: (ctx): RuleOutcome => {
+    const text = ctx.homepage.textContent;
+    const reasoning = (text.match(/因为|由于|因此|所以|这是因为|基于|根据|because|since|due to|based on|according to|研究表明|数据显示|实验证明/gi) ?? []).length;
+    const stats = countStats(text);
+    const extLinks = (ctx.homepage.html.match(/href=["']https?:\/\//gi) ?? []).length;
+    if (reasoning >= 3 && (stats >= 2 || extLinks >= 3)) {
+      return { rating: 'good', evidence: `（降级启发式）${reasoning} 处论证连接词 + ${stats} 处数据/${extLinks} 处外链支撑` };
+    }
+    if (reasoning >= 1 || stats >= 1) {
+      return { rating: 'partial', evidence: `（降级启发式）${reasoning} 处论证连接词、${stats} 处数据，论证支撑中等` };
+    }
+    return { rating: 'poor', evidence: '（降级启发式）未检测到论证连接词或数据支撑（断言无依据）' };
+  },
   fix: { method: 'Authoritative', action: '论点补论据与依据，形成论证链', effort: 'mid' },
 };
 
