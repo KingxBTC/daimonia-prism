@@ -13,6 +13,7 @@ export type {
   NicheTier,
   SiteScale,
   CheckStatus,
+  BonusSignal,
 } from '../core/types.ts';
 
 export type {

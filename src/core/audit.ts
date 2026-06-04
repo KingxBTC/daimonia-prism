@@ -119,10 +119,13 @@ export async function auditLight(
 
   // ── 7. buildScores（确定性聚合：snap/等级/veto/coupling）─────────────
   progress('score', 0.8);
+  // robots 封锁内容时 D1-D4 标 na，不奖励无法完整审计的站 → 抑制 bonus（诚实归因）。
+  const bonusSignals = raw.robots.prismBotAllowed ? result.bonusSignals : [];
   const { scores, vetoes, couplingFlags } = buildScores(
     dimensions,
     result.profile.isYMYL,
     extraCouplingFlags,
+    bonusSignals,
   );
 
   const durationMs = elapsed(startMs);

@@ -96,3 +96,48 @@ CheckResult 已带 `evidence` 字段，Track C = **把 evidence 写扎实 + 渲�
 | **I6** | 验证 | agent-judge 模式复跑暖情 vs abel + anthropic/capcut，量化 separation，回填加分权重 | separation 验证报告 | I1+I2+I3 |
 
 > 优先级：I1/I2/I3/I4 并行启动（互不阻塞）；I5 等 I1 接口定稿（web 上线前做）；I6 等 I1+I2+I3 落地。
+
+---
+
+## 5. I2 落地说明：加分信号（penalty → penalty+bonus）
+
+**状态**：已实现（DAI-1329）。代码：`src/analyzer/bonus.ts`（检测）+ `src/core/scorer.ts`（聚合，`computeBonus`/`BONUS_CAP`/`buildScores`）+ `src/core/types.ts`（`BonusSignal`/`ScoreBonus`）。测试：`tests/bonus-signals.test.ts` + `tests/scorer.test.ts`。
+
+### 5.1 关键取舍：bonus 进**总分**，不进**维度分**
+
+「单维 6 档 + 向下就近」是**单维度不变量**——每个 `DimensionScore.score ∈ {0,20,40,60,80,100}`。若把 bonus 加进维度分再 snap，会出现两种坏情况：① 加分被 snap-down 吃掉（如 80+3→83 仍 snap 80，白加）；② 为了跨档不得不给很大权重，噪声失控。
+
+**解法**：bonus **完全不触碰维度分**，只叠加到**总分**——而总分（`calculateTotal` 的加权和）本来就是连续值、从不是档位量。于是：
+
+- 6 档单维不变量 **零破坏**（维度分仍只由 penalty 模型 + snap 决定）。
+- bonus 作为「额外功夫」的独立加项，透明列在 `scores.bonus.signals`，可审计、可单独调权。
+- 应用顺序：`总分 = min(100, 加权和 + min(Σ信号分, BONUS_CAP))` → 据此算等级 → **一票否决仍最后覆盖**（veto 命中照锁 L0，加分不能救）。
+- 总分**夹紧 ≤100**：满分站已触顶、无需加分区分，bonus 只对未触顶站起作用（正是需要拉开差距的区间）。
+
+### 5.2 信号清单（初值，I6 回填微调）
+
+| 信号 | 维度 | 衡量「高于基础档的额外功夫」 | 档位 |
+|------|------|------|------|
+| `B.rich_schema` | D1 | schema.org **类型丰富度**（基础 `D1.jsonld_schema` 只判有无） | ≥4 种 → +4；2-3 种 → +2 |
+| `B.semantic_html` | D1 | HTML5 **语义化 landmark 标签**（checklist 无对应项，纯新增） | ≥5 种 → +2；3-4 种 → +1 |
+| `B.ssr_rich_content` | D2 | **SSR 正文深度**（基础 `D5.render_mode` 只判非空壳；阈值 ≥800 字符） | 满足 → +2 |
+
+`BONUS_CAP = 8`（= 当前信号档位之和），既封顶防「堆信号压过维度主体」，也作为 I6 追加信号时的前向护栏。
+
+### 5.3 不双重计分原则
+
+bonus 只奖励**基础 penalty 模型尚未计入的额外档**：
+
+- `rich_schema`：基础只判「有无 schema」→ 本信号判「类型数」，是更高一档，不重复。
+- `semantic_html`：基础无此项 → 纯新增。
+- `ssr_rich_content`：基础只判「非 CSR 空壳」→ 本信号判「正文深度」，更高一档。
+- **`/llms.txt` 刻意不做 bonus**：`D2.llms_txt` 基础 check 已有 poor/partial/good 分档（含「H1+链接」高档），再加 bonus 即对同一产物双重奖励。虽在 §I2 候选清单内（「等」为示意），落地时按本原则排除。
+
+### 5.4 边界
+
+- robots 封锁内容（D1-D4 标 na）时**抑制 bonus**（`audit.ts`）——不奖励无法完整审计的站，符合目标 2 的诚实归因。
+- CSR 空壳：`ssr_rich_content` 门控 `!isCSR`，schema/语义信号也因空壳 HTML 自然为 0，无需特判。
+
+### 5.5 验收
+
+`tests/bonus-signals.test.ts`「区分力」用例：rich schema + 语义化 + 深 SSR 的精心站加分 = 8，朴素同结构站 = 0；`tests/scorer.test.ts`「含信号站总分 > 无信号同结构站」：同为 5×60 维度结构下，含信号站 66 > 无信号站 60。**满足 issue 验收「含信号站总分高于无信号同结构站」。** 真站 separation（暖情 vs abel）量化与权重回填见 I6。

@@ -21,6 +21,7 @@ import type {
   SiteProfile,
   Market,
   TopFix,
+  BonusSignal,
 } from './imports.ts';
 
 /** LLM 判断的离散评级（便于 LLM 稳定产出 + 映射到 penalty）。 */
@@ -116,6 +117,8 @@ export interface AnalysisResult {
   /** 恒含 4 项 Deep 专属（PRD §12.1）。 */
   notEvaluated: string[];
   topFixes: TopFix[];
+  /** 加分信号（DAI-1329 / I2）。无信号 → []。Scorer 负责 cap + 进总分。 */
+  bonusSignals: BonusSignal[];
 }
 
 export interface AnalyzeDeps {

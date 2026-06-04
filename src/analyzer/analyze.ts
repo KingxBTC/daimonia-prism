@@ -16,6 +16,7 @@ import { buildCheckResult, assembleDimension } from './aggregate.ts';
 import { inferProfile, heuristicClassification } from './profile.ts';
 import { buildTopFixes } from './topfixes.ts';
 import { buildChinaChecksFromRaw, chinaCheckDimension } from './china.ts';
+import { detectBonusSignals } from './bonus.ts';
 import type {
   AnalysisResult, AnalyzeDeps, CheckContext, CheckDef, DimensionAnalysis,
   LlmJudge, Rating, RuleOutcome,
@@ -114,10 +115,14 @@ export async function analyze(
 
   const topFixes = buildTopFixes(dimensions, CHECKLIST);
 
+  // 加分信号检测（DAI-1329 / I2）：确定性，奖励高于基础档的额外功夫。
+  const bonusSignals = detectBonusSignals(raw);
+
   return {
     profile,
     dimensions,
     notEvaluated: [...DEEP_ONLY_NOT_EVALUATED],
     topFixes,
+    bonusSignals,
   };
 }

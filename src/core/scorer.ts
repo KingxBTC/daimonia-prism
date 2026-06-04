@@ -4,11 +4,13 @@
  */
 
 import type {
+  BonusSignal,
   CouplingFlag,
   DimensionId,
   DimensionScore,
   Level,
   Scores,
+  ScoreBonus,
   Veto,
 } from './types.ts';
 
@@ -144,6 +146,26 @@ export function computeCouplingFlags(
   return flags;
 }
 
+/**
+ * 加分上限（DAI-1329 / I2）。
+ *
+ * 关键取舍（docs/iteration-light-discrimination.md §I2）：
+ *  - bonus **不进维度分**（保 6 档单维不变量），只进**总分**（total 本就连续）。
+ *  - 加分**封顶**，防止「堆信号」压过维度主体；当前信号档位之和恰为 8，cap 同时作为
+ *    I6 后续追加信号时的前向护栏。
+ *  - 总分加 bonus 后**夹紧 ≤100**：满分站（已 100）无需加分区分，bonus 只对未触顶站起作用。
+ */
+export const BONUS_CAP = 8;
+
+/**
+ * 聚合加分信号 → ScoreBonus（确定性，cap 封顶）。
+ * Analyzer 负责检测信号（每信号带 points + evidence），Scorer 只做求和 + cap。
+ */
+export function computeBonus(signals: BonusSignal[] = []): ScoreBonus {
+  const sum = signals.reduce((s, x) => s + Math.max(0, x.points), 0);
+  return { applied: Math.min(sum, BONUS_CAP), cap: BONUS_CAP, signals };
+}
+
 /** buildScores 返回的打分包：最终 Scores + 透明项（vetoes/coupling）。 */
 export interface ScoreBundle {
   scores: Scores;
@@ -162,14 +184,20 @@ export interface ScoreBundle {
  *
  * Light 档总是 indicative=true（§3.2）。
  *
+ * 加分（DAI-1329 / I2）：在 snap 后的加权总分上叠加 capped bonus（夹紧 ≤100），
+ * 再据此算等级——加分**不触碰维度分**，6 档单维不变量零破坏（见 BONUS_CAP 注释）。
+ * 一票否决仍在最后覆盖等级（veto 优先于加分）。
+ *
  * @param dimensions 五维度分（含 raw score；本函数负责 snap）。
  * @param isYMYL     画像是否 YMYL（影响 YMYL_D3<40 veto）。
  * @param extraCouplingFlags 采集/错误处理期注入的额外 flag。
+ * @param bonusSignals Analyzer 检测的加分信号（无信号 → []）。
  */
 export function buildScores(
   dimensions: Record<DimensionId, DimensionScore>,
   isYMYL: boolean,
   extraCouplingFlags: CouplingFlag[] = [],
+  bonusSignals: BonusSignal[] = [],
 ): ScoreBundle {
   const ALL_DIMS: DimensionId[] = ['D1', 'D2', 'D3', 'D4', 'D5'];
   const snapped = {} as Record<DimensionId, DimensionScore>;
@@ -178,13 +206,15 @@ export function buildScores(
     snapped[id] = { ...d, score: snapToTier(d.score) };
   }
 
-  const { total } = calculateTotal(snapped);
+  const { total: baseTotal } = calculateTotal(snapped);
+  const bonus = computeBonus(bonusSignals);
+  const total = Math.min(100, baseTotal + bonus.applied);
   const vetoes = checkVetoes(snapped, isYMYL);
   const level = applyVetoes(calculateLevel(total), vetoes);
   const couplingFlags = [...computeCouplingFlags(snapped), ...extraCouplingFlags];
 
   return {
-    scores: { total, level, indicative: true, dimensions: snapped },
+    scores: { total, level, indicative: true, dimensions: snapped, bonus },
     vetoes,
     couplingFlags,
   };

@@ -75,11 +75,37 @@ export interface DimensionScore {
   checks: CheckResult[];
 }
 
+/**
+ * 加分信号（DAI-1329 / I2）—— 奖励「做了额外功夫」的站。
+ *
+ * 关键取舍（docs/iteration-light-discrimination.md §I2）：
+ *  - 6 档 snap 是**单维度不变量**（DimensionScore.score ∈ {0,20,40,60,80,100}）。
+ *  - bonus **不进维度分**，只进**总分**（total 本就是连续加权和，非档位值）→ 6 档语义零破坏。
+ *  - bonus 衡量的是**高于基础二元 check 的「额外一档」**（schema 类型数、语义化标签、SSR 正文深度），
+ *    不奖励基础 penalty 模型已计入的「存在性」，避免双重计分。
+ */
+export interface BonusSignal {
+  id: string;            // e.g. "B.rich_schema"
+  name: string;
+  dimension: DimensionId;
+  points: number;        // 该信号实际加分（≥0，已按档计）
+  evidence: string;
+}
+
+/** 加分聚合结果（确定性，由 Scorer 装配）。 */
+export interface ScoreBonus {
+  applied: number;       // 实际计入总分的加分（cap 后）
+  cap: number;           // 加分上限
+  signals: BonusSignal[];
+}
+
 export interface Scores {
   total: number;
   level: Level;
   indicative: boolean;
   dimensions: Record<DimensionId, DimensionScore>;
+  /** 加分信号（DAI-1329 / I2）。无信号时 applied=0，signals=[]。 */
+  bonus?: ScoreBonus;
 }
 
 export interface Veto {

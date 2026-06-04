@@ -19,9 +19,16 @@ import {
   applyVetoes,
   computeCouplingFlags,
   buildScores,
+  computeBonus,
+  BONUS_CAP,
 } from '../src/core/scorer.ts';
 import { auditLight, auditDeep } from '../src/core/audit.ts';
-import type { DimensionId, DimensionScore } from '../src/core/types.ts';
+import type { BonusSignal, DimensionId, DimensionScore } from '../src/core/types.ts';
+
+/** 构造测试用加分信号。 */
+function sig(points: number, id = 'B.test'): BonusSignal {
+  return { id, name: id, dimension: 'D1', points, evidence: '' };
+}
 
 /** 构造一个最小 DimensionScore（测试用）。 */
 function dim(score: number, partial = false): DimensionScore {
@@ -166,6 +173,82 @@ describe('buildScores — Scorer 装配（PRD §3/§4/§5.3）', () => {
       { code: 'csr_empty_html', note: 'view-source 无内容' },
     ]);
     assert.ok(couplingFlags.some(f => f.code === 'csr_empty_html'));
+  });
+});
+
+describe('computeBonus — 加分聚合 + 封顶（DAI-1329 / I2）', () => {
+  test('求和多个信号', () => {
+    assert.strictEqual(computeBonus([sig(4), sig(2), sig(1)]).applied, 7);
+  });
+
+  test('封顶在 BONUS_CAP', () => {
+    const b = computeBonus([sig(BONUS_CAP), sig(5)]);
+    assert.strictEqual(b.applied, BONUS_CAP);
+    assert.strictEqual(b.cap, BONUS_CAP);
+  });
+
+  test('负分被夹为 0；空 → applied 0', () => {
+    assert.strictEqual(computeBonus([sig(-3)]).applied, 0);
+    assert.strictEqual(computeBonus([]).applied, 0);
+    assert.strictEqual(computeBonus().applied, 0);
+  });
+
+  test('signals 原样回传（透明列出）', () => {
+    const s = [sig(2, 'B.rich_schema')];
+    assert.deepStrictEqual(computeBonus(s).signals, s);
+  });
+});
+
+describe('buildScores × bonus — snap 交互 + 6 档不变量（DAI-1329 / I2）', () => {
+  const baseDims = () => dims({ D1: 60, D2: 60, D3: 60, D4: 60, D5: 60 });
+
+  test('含信号站总分 > 无信号同结构站（核心验收）', () => {
+    const without = buildScores(baseDims(), false).scores.total;
+    const withSig = buildScores(baseDims(), false, [], [sig(4), sig(2)]).scores.total;
+    assert.ok(withSig > without, `含信号应更高：${withSig} vs ${without}`);
+    assert.strictEqual(without, 60);
+    assert.strictEqual(withSig, 66); // 60 + 6
+  });
+
+  test('加分不触碰维度分（6 档单维不变量保持）', () => {
+    const { scores } = buildScores(baseDims(), false, [], [sig(BONUS_CAP)]);
+    for (const id of ['D1', 'D2', 'D3', 'D4', 'D5'] as DimensionId[]) {
+      assert.strictEqual(scores.dimensions[id].score, 60, `${id} 维度分不应被加分改变`);
+    }
+    assert.strictEqual(scores.bonus?.applied, BONUS_CAP);
+  });
+
+  test('总分夹紧 ≤100（满分站 + 加分仍 100）', () => {
+    const full = dims({ D1: 100, D2: 100, D3: 100, D4: 100, D5: 100 });
+    assert.strictEqual(buildScores(full, false, [], [sig(BONUS_CAP)]).scores.total, 100);
+  });
+
+  test('加分可推动等级跨档（60/L1 + bonus → L2）', () => {
+    const without = buildScores(baseDims(), false);
+    assert.strictEqual(without.scores.level, 'L1');
+    const withSig = buildScores(baseDims(), false, [], [sig(2)]); // 60 → 62
+    assert.strictEqual(withSig.scores.total, 62);
+    assert.strictEqual(withSig.scores.level, 'L2');
+  });
+
+  test('一票否决优先于加分（veto 命中仍 L0）', () => {
+    const d = dims({ D1: 100, D2: 100, D3: 100, D4: 100, D5: 40 }); // D5<60 veto
+    const { scores } = buildScores(d, false, [], [sig(BONUS_CAP)]);
+    assert.strictEqual(scores.level, 'L0');
+  });
+
+  test('snap 后再加分：维度 79→snap60，加权 60，+bonus 只加在总分', () => {
+    const { scores } = buildScores(
+      dims({ D1: 79, D2: 79, D3: 79, D4: 79, D5: 79 }), false, [], [sig(4)],
+    );
+    assert.strictEqual(scores.dimensions.D1.score, 60); // 防御性 snap
+    assert.strictEqual(scores.total, 64); // 60 + 4
+  });
+
+  test('无信号时 bonus.applied=0，总分等于纯加权和（向后兼容）', () => {
+    const { scores } = buildScores(baseDims(), false);
+    assert.strictEqual(scores.total, 60);
+    assert.strictEqual(scores.bonus?.applied, 0);
   });
 });
 
