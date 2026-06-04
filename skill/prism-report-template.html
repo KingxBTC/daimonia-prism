@@ -84,6 +84,16 @@
     .issues { margin: 0; padding-left: 18px; color: var(--ink); font-size: 14px; }
     .issues li + li { margin-top: var(--s2); }
     .partial { display: inline-flex; align-items: center; min-height: 24px; padding: 0 var(--s2); border-radius: 999px; background: rgba(168, 100, 18, 0.14); color: var(--warn); font-size: 12px; font-weight: 800; }
+    .deductions { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--line); }
+    .deductions summary { cursor: pointer; color: var(--muted); font-size: 12px; font-weight: 900; }
+    .deduction-list { margin: var(--s3) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s2); }
+    .deduction-item { padding: var(--s3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: 13px; }
+    .deduction-top { display: flex; justify-content: space-between; gap: var(--s2); align-items: start; margin-bottom: var(--s1); }
+    .deduction-name { font-weight: 800; overflow-wrap: anywhere; }
+    .deduction-status { flex: 0 0 auto; font-size: 11px; font-weight: 900; }
+    .deduction-status.status-fail { color: var(--bad); }
+    .deduction-status.status-partial { color: var(--warn); }
+    .deduction-evidence { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
 
     .fixes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
     .fix-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--s5); background: #171717; color: #fffdf8; min-width: 0; }
@@ -253,11 +263,29 @@
     "level": "L1",
     "indicative": true,
     "dimensions": {
-      "D1": { "score": 60, "weight": 0.20, "partial": false, "issues": ["schema.org 仅首页有，内容页缺 Article 标注", "H2/H3 层级在服务页不稳定"], "checks": [] },
-      "D2": { "score": 40, "weight": 0.20, "partial": false, "issues": ["缺 /llms.txt", "FAQ 藏在长段落，AI 不易抽取"], "checks": [] },
-      "D3": { "score": 45, "weight": 0.25, "partial": true, "issues": ["作者无资质标注", "About 页面缺团队背景和审核机制"], "checks": [] },
-      "D4": { "score": 50, "weight": 0.25, "partial": true, "issues": ["核心结论缺数字、样本量、时间窗口", "引用单元没有清晰出处"], "checks": [] },
-      "D5": { "score": 70, "weight": 0.10, "partial": false, "issues": ["robots 未显式声明 LLM bot 策略"], "checks": [] }
+      "D1": { "score": 60, "weight": 0.20, "partial": false, "issues": ["schema.org 仅首页有，内容页缺 Article 标注", "H2/H3 层级在服务页不稳定"], "checks": [
+        { "id": "D1.schema_depth", "name": "schema.org 覆盖深度", "tier": "L", "status": "fail", "evidence": "首页有 Organization 标注，/about 与 /services 未发现 Article/Service JSON-LD。", "scoreImpact": -40 },
+        { "id": "D1.heading_hierarchy", "name": "标题层级稳定性", "tier": "L", "status": "partial", "evidence": "抽样 3 页中 /services 出现 H2 跳到 H4，层级可读性不稳定。", "scoreImpact": -15 },
+        { "id": "D1.navigation", "name": "核心导航可达", "tier": "L", "status": "pass", "evidence": "主导航包含服务、案例、关于入口。", "scoreImpact": 0 }
+      ] },
+      "D2": { "score": 40, "weight": 0.20, "partial": false, "issues": ["缺 /llms.txt", "FAQ 藏在长段落，AI 不易抽取"], "checks": [
+        { "id": "D2.llms_txt", "name": "/llms.txt", "tier": "L", "status": "fail", "evidence": "GET https://example.com/llms.txt 返回 404。", "scoreImpact": -10 },
+        { "id": "D2.faq_extractability", "name": "FAQ 可抽取性", "tier": "L+D", "status": "partial", "evidence": "FAQ 内容存在，但混在长段落内，未使用 FAQPage schema 或清晰问答结构。", "scoreImpact": -7.5 },
+        { "id": "D2.core_copy", "name": "核心服务说明", "tier": "L", "status": "pass", "evidence": "首页首屏有明确服务定位。", "scoreImpact": 0 }
+      ] },
+      "D3": { "score": 45, "weight": 0.25, "partial": true, "issues": ["作者无资质标注", "About 页面缺团队背景和审核机制"], "checks": [
+        { "id": "D3.author_credentials", "name": "作者/顾问资质", "tier": "L", "status": "fail", "evidence": "服务页和文章页未看到咨询师资质、执业背景或审核人信息。", "scoreImpact": -30 },
+        { "id": "D3.review_process", "name": "内容审核机制", "tier": "L+D", "status": "partial", "evidence": "About 页面提到团队经验，但未说明内容由谁审核、多久更新。", "scoreImpact": -12.5 }
+      ] },
+      "D4": { "score": 50, "weight": 0.25, "partial": true, "issues": ["核心结论缺数字、样本量、时间窗口", "引用单元没有清晰出处"], "checks": [
+        { "id": "D4.statistics", "name": "统计数字与时间窗口", "tier": "L+D", "status": "fail", "evidence": "核心服务页使用“成功率很高”等判断，但未提供样本量、时间窗口或来源。", "scoreImpact": -30 },
+        { "id": "D4.sources", "name": "出处可追溯", "tier": "L+D", "status": "partial", "evidence": "部分文章引用外部观点，但未给出原始链接或发布日期。", "scoreImpact": -12.5 },
+        { "id": "D4.deep_cross_query", "name": "跨 query 稳定性", "tier": "D", "status": "na", "evidence": "需 Deep 审计实测，不参与 Light 计分。", "scoreImpact": 0 }
+      ] },
+      "D5": { "score": 70, "weight": 0.10, "partial": false, "issues": ["robots 未显式声明 LLM bot 策略"], "checks": [
+        { "id": "D5.robots_llm", "name": "LLM bot robots 策略", "tier": "L", "status": "partial", "evidence": "robots.txt 可访问，但未显式声明 GPTBot/ClaudeBot/PerplexityBot 策略。", "scoreImpact": -15 },
+        { "id": "D5.performance", "name": "首页性能", "tier": "L", "status": "pass", "evidence": "PageSpeed 性能分 82。", "scoreImpact": 0 }
+      ] }
     }
   },
   "vetoes": [
@@ -326,6 +354,26 @@
     function listItems(items) {
       const safe = Array.isArray(items) && items.length ? items : ["暂无"];
       return safe.map((item) => `<li>${esc(item)}</li>`).join("");
+    }
+
+    const CHECK_STATUS_LABELS = { fail: "未达标", partial: "部分达标" };
+
+    function renderDeductions(checks) {
+      const flagged = Array.isArray(checks)
+        ? checks.filter((check) => check && (check.status === "fail" || check.status === "partial"))
+        : [];
+      if (!flagged.length) return "";
+      const rows = flagged.map((check) => `<li class="deduction-item">
+        <div class="deduction-top">
+          <strong class="deduction-name">${esc(check.name)}</strong>
+          <span class="deduction-status status-${check.status}">${esc(CHECK_STATUS_LABELS[check.status], check.status)}</span>
+        </div>
+        <p class="deduction-evidence">${esc(check.evidence)}</p>
+      </li>`).join("");
+      return `<details class="deductions" open>
+        <summary>扣分明细 · ${flagged.length} 项</summary>
+        <ul class="deduction-list">${rows}</ul>
+      </details>`;
     }
 
     function renderMeta() {
@@ -403,6 +451,7 @@
           <div class="bar" aria-hidden="true"><span style="width:${pct(item.score)}"></span></div>
           ${item.partial ? `<span class="partial">partial</span>` : ""}
           <ul class="issues">${listItems(item.issues)}</ul>
+          ${renderDeductions(item.checks)}
         </article>`;
       }).join("");
     }

@@ -82,7 +82,18 @@ const baseReport = {
     indicative: true,
     dimensions: {
       D1: { score: 60, weight: 0.2, partial: false, issues: ['正常问题文案'], checks: [] },
-      D2: { score: 40, weight: 0.2, partial: false, issues: ['x'], checks: [] },
+      D2: {
+        score: 40,
+        weight: 0.2,
+        partial: false,
+        issues: ['x'],
+        checks: [
+          { id: 'D2.llms_txt', name: '/llms.txt', tier: 'L', status: 'fail', evidence: '404', scoreImpact: -10 },
+          { id: 'D2.faq', name: 'FAQ 可抽取性', tier: 'L+D', status: 'partial', evidence: 'FAQ 混在长段落内', scoreImpact: -7.5 },
+          { id: 'D2.copy', name: '通过项', tier: 'L', status: 'pass', evidence: 'ok', scoreImpact: 0 },
+          { id: 'D2.deep', name: 'NA 项', tier: 'D', status: 'na', evidence: '需 Deep', scoreImpact: 0 },
+        ],
+      },
       D3: { score: 45, weight: 0.25, partial: true, issues: ['x'], checks: [] },
       D4: { score: 50, weight: 0.25, partial: true, issues: ['x'], checks: [] },
       D5: { score: 70, weight: 0.1, partial: false, issues: ['x'], checks: [] },
@@ -117,6 +128,20 @@ test('xss: dimensions issues 注入脚本被转义', () => {
   const dims = store['dimensions#innerHTML'];
   assert.ok(!dims.includes('<svg/onload=alert(2)>'), 'dimensions innerHTML 不得含裸 <svg onload>');
   assert.ok(dims.includes('&lt;svg/onload=alert(2)&gt;'), 'payload 应转义为实体文本');
+});
+
+test('xss: dimensions checks 扣分明细只渲染 fail/partial 且 evidence 被转义', () => {
+  const r = JSON.parse(JSON.stringify(baseReport));
+  r.scores.dimensions.D2.checks[0].evidence = XSS;
+  const store = runTemplate(r);
+  const dims = store['dimensions#innerHTML'];
+  assert.ok(dims.includes('扣分明细 · 2 项'), '应显示 fail/partial 两项扣分明细');
+  assert.ok(dims.includes('/llms.txt'), 'fail 检查项名称应显示');
+  assert.ok(dims.includes('FAQ 可抽取性'), 'partial 检查项名称应显示');
+  assert.ok(!dims.includes('通过项'), 'pass 项不应出现在扣分明细');
+  assert.ok(!dims.includes('NA 项'), 'na 项不应出现在扣分明细');
+  assert.ok(!dims.includes(XSS), 'check evidence innerHTML 不得含裸 payload');
+  assert.ok(dims.includes(XSS_ESCAPED), 'check evidence payload 应转义为实体文本');
 });
 
 test('xss: meta（profile.businessType / meta.url）注入被转义', () => {
