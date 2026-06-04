@@ -9,7 +9,7 @@
 import type { RawSiteData, RawPageData, CollectorError } from './types.ts';
 import { fetchPage, fetchFile, FetchError } from './http.ts';
 import { parseRobots, emptyRobots, isPrismAllowed } from './robots.ts';
-import { parseSitemap, emptySitemap, estimateSiteScale } from './sitemap.ts';
+import { resolveSitemap, emptySitemap, estimateSiteScale } from './sitemap.ts';
 import { extractPage } from './extractor.ts';
 import { fetchCwv } from './cwv.ts';
 import { selectSamplePages } from './sampler.ts';
@@ -95,12 +95,21 @@ export async function collect(inputUrl: string, opts: CollectOptions = {}): Prom
     `${new URL(homepageResult.finalUrl).origin}/sitemap.xml`,
     `${new URL(homepageResult.finalUrl).origin}/sitemap_index.xml`,
   ];
+  // sitemap index 格式需递归展开子 sitemap，否则只读到索引本身（DAI-1323）
+  const sitemapFetcher = async (url: string): Promise<string | null> => {
+    try {
+      const file = await fetchFile(url);
+      return file ? file.body : null;
+    } catch {
+      return null;
+    }
+  };
   let sitemap = emptySitemap();
   for (const sitemapUrl of sitemapCandidates) {
     try {
       const file = await fetchFile(sitemapUrl);
       if (file) {
-        sitemap = parseSitemap(file.body);
+        sitemap = await resolveSitemap(file.body, sitemapFetcher);
         break;
       }
     } catch {

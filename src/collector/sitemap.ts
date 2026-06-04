@@ -7,6 +7,13 @@
 import type { SitemapParsed } from './types.ts';
 
 const MAX_URLS_PER_SITEMAP = 500;
+/** 整个 sitemap index 树最多抓取的子 sitemap 数（防爆量 / 防循环） */
+const MAX_SUB_SITEMAP_FETCHES = 50;
+/** sitemap index 递归最大深度 */
+const MAX_SITEMAP_DEPTH = 3;
+
+/** 抓取子 sitemap 的回调：返回 XML body，失败 / 404 返回 null */
+export type SitemapFetcher = (url: string) => Promise<string | null>;
 
 export function parseSitemap(xml: string, baseUrl?: string): SitemapParsed {
   const subSitemapUrls = extractSitemapIndexUrls(xml);
@@ -17,6 +24,61 @@ export function parseSitemap(xml: string, baseUrl?: string): SitemapParsed {
     urls: contentUrls.slice(0, MAX_URLS_PER_SITEMAP),
     totalUrlCount: contentUrls.length,
     subSitemapUrls,
+  };
+}
+
+/**
+ * 解析 sitemap 并递归展开 sitemap index（DAI-1323）
+ *
+ * 普通 urlset：等价于 parseSitemap，不调用 fetcher。
+ * sitemap index：用 fetcher 抓取每个子 sitemap，聚合其内容页 URL；
+ * 子 sitemap 本身又是 index 时继续递归（最多 MAX_SITEMAP_DEPTH 层）。
+ *
+ * 防护：全树最多抓取 MAX_SUB_SITEMAP_FETCHES 个子 sitemap，并用 visited 集去重，
+ * 避免自引用 / 循环导致无限递归。子 sitemap 抓取失败（fetcher 抛错或返回 null）跳过不崩。
+ */
+export async function resolveSitemap(
+  rootXml: string,
+  fetcher: SitemapFetcher,
+): Promise<SitemapParsed> {
+  const root = parseSitemap(rootXml);
+  const aggregatedUrls: string[] = [...root.urls];
+  let totalUrlCount = root.totalUrlCount;
+  const visited = new Set<string>();
+  let fetchCount = 0;
+
+  async function walk(subSitemapUrls: string[], depth: number): Promise<void> {
+    if (depth > MAX_SITEMAP_DEPTH) return;
+    for (const subUrl of subSitemapUrls) {
+      if (fetchCount >= MAX_SUB_SITEMAP_FETCHES) return;
+      if (visited.has(subUrl)) continue;
+      visited.add(subUrl);
+      fetchCount++;
+
+      let body: string | null;
+      try {
+        body = await fetcher(subUrl);
+      } catch {
+        continue;
+      }
+      if (!body) continue;
+
+      const sub = parseSitemap(body);
+      aggregatedUrls.push(...sub.urls);
+      totalUrlCount += sub.totalUrlCount;
+      if (sub.subSitemapUrls.length > 0) {
+        await walk(sub.subSitemapUrls, depth + 1);
+      }
+    }
+  }
+
+  await walk(root.subSitemapUrls, 1);
+
+  return {
+    exists: true,
+    urls: aggregatedUrls.slice(0, MAX_URLS_PER_SITEMAP),
+    totalUrlCount,
+    subSitemapUrls: root.subSitemapUrls,
   };
 }
 
