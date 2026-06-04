@@ -1,6 +1,7 @@
 ---
 name: prism-geo-audit
 description: >-
+  Daimonia Prism — GEO competitive audit for AI search engines.
   Prism（棱镜）GEO 审计 —— 输入一个网站 URL + 目标市场，按 geo_audit_standard v0.5.1
   §5.A Light 流程跑 D1–D5 五维度站内静态审计，对话内输出中文 markdown 报告，并额外产出一份
   可分享的自包含 HTML 报告文件。MVP 为 Light 档（秒/分钟级站内静态筛查），非多引擎实测。
