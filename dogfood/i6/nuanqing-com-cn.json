@@ -1,0 +1,355 @@
+{
+  "meta": {
+    "url": "https://nuanqing.com.cn",
+    "market": "china",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-04T08:32:18.588Z",
+    "durationMs": 13594,
+    "sampledPages": [
+      "https://nuanqing.com.cn/",
+      "https://nuanqing.com.cn/about/",
+      "https://nuanqing.com.cn/about/",
+      "https://nuanqing.com.cn/services/"
+    ]
+  },
+  "profile": {
+    "domain": "nuanqing.com.cn",
+    "businessType": "暖情咨询",
+    "isYMYL": true,
+    "ymylCategory": "情感婚姻心理",
+    "nicheTier": "niche",
+    "siteScale": "<100",
+    "primaryLanguage": "zh-CN",
+    "geoMarket": "中国大陆",
+    "targetEngines": [
+      "baidu",
+      "doubao",
+      "yuanbao",
+      "deepseek",
+      "qwen"
+    ]
+  },
+  "scores": {
+    "total": 94,
+    "level": "L3",
+    "indicative": true,
+    "dimensions": {
+      "D1": {
+        "score": 100,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [],
+        "checks": [
+          {
+            "id": "D1.jsonld_schema",
+            "name": "JSON-LD / schema.org 标注",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全部 4 个抽样页均有 schema.org 标注",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.heading_hierarchy",
+            "name": "H1-H4 层级一致性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "单一 H1 + 28 个标题层级清晰",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.nav_clarity",
+            "name": "章节树 / 导航清晰度",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "章节树自解释、按主题分块清晰：服务（情感婚姻/个人成长/青少年/企业）、团队、来访者声音、洞察、FAQ、联系，H1-H4 层级分明，LLM 易定位主题。",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D2": {
+        "score": 80,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "[china] 盲区引擎（内容完全抓不到）：小红书点点(P3)。仅间接可达：豆包(P0)。整改方向：豆包←douyin/toutiao；小红书点点←xiaohongshu。",
+          "GET /llms.txt → 不存在（-10）",
+          "view-source 含 JSON-LD 与分节小标题，关键短语（服务名/数据）有节奏感，但缺少明确的正文重点加粗（结论级强调）佐证，判 partial。"
+        ],
+        "checks": [
+          {
+            "id": "D2.paragraph_list_table",
+            "name": "段落/列表/表格语义结构",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "正文用带标号的服务卡（01-04）+ 项目符号列表（·）+ 团队卡 + Facts 数据块 + 分节标题组织，meso 结构良好，非大段堆砌。",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.faq_block",
+            "name": "FAQ / Q&A 块",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "检测到 FAQ/Q&A 结构（利于 LLM 直接引用问答对）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.micro_emphasis",
+            "name": "micro 强调节制度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "view-source 含 JSON-LD 与分节小标题，关键短语（服务名/数据）有节奏感，但缺少明确的正文重点加粗（结论级强调）佐证，判 partial。",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.self_contained",
+            "name": "self-contained 自足性",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "多数段落自足：团队成员卡（『伍群英 创始人 婚姻家庭 从业20+年』）、Facts 数据、来访者整段引语均可独立引用，不依赖图片/上下文。",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.css_stripped_readability",
+            "name": "删 CSS 可读性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "删 CSS 后纯文本 3348 字，可读性良好",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.llms_txt",
+            "name": "/llms.txt 存在性与格式",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "GET /llms.txt → 不存在（-10）",
+            "scoreImpact": -10
+          },
+          {
+            "id": "china.platform_reachability",
+            "name": "内容平台覆盖 vs LLM 可达性盲区（§6.3）",
+            "tier": "L",
+            "status": "partial",
+            "scoreImpact": -10,
+            "evidence": "盲区引擎（内容完全抓不到）：小红书点点(P3)。仅间接可达：豆包(P0)。整改方向：豆包←douyin/toutiao；小红书点点←xiaohongshu。"
+          }
+        ]
+      },
+      "D3": {
+        "score": 100,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [],
+        "checks": [
+          {
+            "id": "D3.about_page",
+            "name": "About / 机构信息存在性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "检测到 About/机构信息（链接或 Organization schema）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D3.author_credentials",
+            "name": "作者 / 资质标注",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "JSON-LD Person 标注创始人伍群英 jobTitle『创始人/首席咨询师』+ hasCredential（浙江省婚姻家庭协会副会长、拱墅区婚姻家庭协会会长）；5 位主咨询师均标注擅长领域 + 从业年限，E-E-A-T 权威信号充分。",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D3.freshness",
+            "name": "内容时间新鲜度",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "页面含 datePublished/dateModified 结构化时间标注",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D3.transparency",
+            "name": "透明度（来源/披露/政策）",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "数据有时间戳（『数据截至2025年』）、案例授权与脱敏披露（『所有案例经当事人授权，严格脱敏』）、资质证书/媒体报道/政府合作可查，来源与披露透明。",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D4": {
+        "score": 60,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "每节有清晰主张（服务定位、团队、数据），FAQ 提供结论先行问答，但首页整体偏品牌叙事而非一句话答案前置，判 partial。",
+          "权威主张有支撑（2000+家庭、8+年、协会职务、媒体合作、来访者反馈作论据），但首页未对每条主张展开完整论点-论据-依据链，判 partial。"
+        ],
+        "checks": [
+          {
+            "id": "D4.statistics_usage",
+            "name": "Statistics 使用率（具体数字/样本）",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "检测到 7 处统计量/具体数字",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.citation_usage",
+            "name": "Cite / 引用来源使用率",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "检测到 3 处 cite/quote + 23 处外链引用",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.conclusion_clarity",
+            "name": "结论明确性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "每节有清晰主张（服务定位、团队、数据），FAQ 提供结论先行问答，但首页整体偏品牌叙事而非一句话答案前置，判 partial。",
+            "scoreImpact": -12.5
+          },
+          {
+            "id": "D4.justification",
+            "name": "Justification 论证结构",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "权威主张有支撑（2000+家庭、8+年、协会职务、媒体合作、来访者反馈作论据），但首页未对每条主张展开完整论点-论据-依据链，判 partial。",
+            "scoreImpact": -10
+          }
+        ]
+      },
+      "D5": {
+        "score": 100,
+        "weight": 0.1,
+        "partial": true,
+        "issues": [
+          "CWV 未取到（PageSpeed API 失败）"
+        ],
+        "checks": [
+          {
+            "id": "D5.robots_llm_bots",
+            "name": "robots.txt 对 LLM bot 的允许策略",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "robots.txt 未禁止任何已知 LLM bot（0 个有显式条目）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.https",
+            "name": "HTTPS / 证书",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全站 HTTPS",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.render_mode",
+            "name": "view-source 渲染模式（SSR vs CSR 空壳）",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "view-source 含实质内容（SSR/SSG，bot 可直接抓取）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.sitemap",
+            "name": "sitemap.xml 存在 + 覆盖",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "sitemap.xml 存在，含 48 个 URL",
+            "scoreImpact": 0
+          },
+          {
+            "id": "china.robots_cn_bots",
+            "name": "robots.txt 国内 bot 策略核查（§6.3）",
+            "tier": "L",
+            "status": "pass",
+            "scoreImpact": 0,
+            "evidence": "未发现封禁目标引擎相关国内 bot（已核查 Baiduspider / Bytespider / Sogou web spider / YisouSpider）。 注：平台原生内容（公众号/抖音/视频号）走平台索引，不受 robots 控制（§6.3 D5）。DeepSeek（博查）/ Kimi（自建/Bing 系）无稳定公开中文 bot UA，其开放 web 可达性依赖通用爬虫（Bingbot/Googlebot），robots 核查请并看国际 bot 清单。"
+          },
+          {
+            "id": "D5.cwv",
+            "name": "Core Web Vitals（PageSpeed Insights）",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "PageSpeed API 失败，CWV 未取到（PSI fetch 失败: fetch failed）",
+            "scoreImpact": 0
+          }
+        ]
+      }
+    },
+    "bonus": {
+      "applied": 8,
+      "cap": 8,
+      "signals": [
+        {
+          "id": "B.rich_schema",
+          "name": "schema 类型丰富度",
+          "dimension": "D1",
+          "points": 4,
+          "evidence": "检测到 15 种 schema.org 类型（Organization/PostalAddress/Person/EducationalOccupationalCredential/ProfessionalService…），结构化标注超出基础水平"
+        },
+        {
+          "id": "B.semantic_html",
+          "name": "语义化 HTML 结构",
+          "dimension": "D1",
+          "points": 2,
+          "evidence": "首页使用 7 种语义化标签（main/article/section/nav/header/footer/figure），利于 bot 切分内容"
+        },
+        {
+          "id": "B.ssr_rich_content",
+          "name": "SSR 正文深度",
+          "dimension": "D2",
+          "points": 2,
+          "evidence": "view-source 含完整正文（约 3348 字符，SSR/SSG），bot 可直接抓取全文"
+        }
+      ]
+    }
+  },
+  "vetoes": [
+    {
+      "rule": "D5<60",
+      "triggered": false
+    },
+    {
+      "rule": "YMYL_D3<40",
+      "triggered": false
+    }
+  ],
+  "couplingFlags": [],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "nicheWarning": "当前 indicative 分数对 Niche 主体易虚高，Deep 审计可能触发 L2 封顶",
+  "topFixes": [
+    {
+      "priority": 1,
+      "dimension": "D4",
+      "method": "Quotation Addition",
+      "action": "段首给结论句（可被直接引用的明确表述）",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "mid"
+    },
+    {
+      "priority": 2,
+      "dimension": "D2",
+      "method": "llms.txt",
+      "action": "新增 /llms.txt（H1 + 站点定位 + 核心页链接）",
+      "rationale": "缺失明确 -10 分，零成本快赢",
+      "effort": "low"
+    },
+    {
+      "priority": 3,
+      "dimension": "D4",
+      "method": "Authoritative",
+      "action": "论点补论据与依据，形成论证链",
+      "rationale": "低成本可改进项",
+      "effort": "mid"
+    }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "YMYL 领域，权威性 earned media 需 Deep 实测；Niche 主体，Light 分易虚高，Deep 可能触发封顶；D3 earned media 覆盖度 + D4 跨 query 稳定性未评，需 Deep 获得完整分数"
+}

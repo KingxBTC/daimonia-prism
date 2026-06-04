@@ -1,0 +1,358 @@
+{
+  "meta": {
+    "url": "https://www.capcut.cn",
+    "market": "china",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-04T08:32:37.145Z",
+    "durationMs": 18425,
+    "sampledPages": [
+      "https://www.capcut.cn/",
+      "https://www.capcut.cn/mobile_portal",
+      "https://www.capcut.cn/learning",
+      "https://www.capcut.cn/bussiness_inquiry"
+    ]
+  },
+  "profile": {
+    "domain": "www.capcut.cn",
+    "businessType": "剪映官网",
+    "isYMYL": false,
+    "nicheTier": "niche",
+    "siteScale": "<100",
+    "primaryLanguage": "zh-CN",
+    "geoMarket": "中国大陆",
+    "targetEngines": [
+      "baidu",
+      "doubao",
+      "yuanbao",
+      "deepseek",
+      "qwen"
+    ]
+  },
+  "scores": {
+    "total": 39,
+    "level": "L0",
+    "indicative": true,
+    "dimensions": {
+      "D1": {
+        "score": 40,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "全站无 JSON-LD/schema.org 标注（已扫 4 页，0 命中）",
+          "仅 1 个 H1 + 3 个 H2（更多AI智能工具/专业剪辑/全能易用），章节树极浅，按功能类目分块但层级单薄，判 partial。"
+        ],
+        "checks": [
+          {
+            "id": "D1.jsonld_schema",
+            "name": "JSON-LD / schema.org 标注",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "全站无 JSON-LD/schema.org 标注（已扫 4 页，0 命中）",
+            "scoreImpact": -40
+          },
+          {
+            "id": "D1.heading_hierarchy",
+            "name": "H1-H4 层级一致性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "单一 H1 + 4 个标题层级清晰",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.nav_clarity",
+            "name": "章节树 / 导航清晰度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "仅 1 个 H1 + 3 个 H2（更多AI智能工具/专业剪辑/全能易用），章节树极浅，按功能类目分块但层级单薄，判 partial。",
+            "scoreImpact": -15
+          }
+        ]
+      },
+      "D2": {
+        "score": 40,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "[china] 盲区引擎（内容完全抓不到）：小红书点点(P3)。仅间接可达：豆包(P0)、腾讯元宝(P0)、腾讯混元(P2)。整改方向：豆包←douyin/toutiao；腾讯元宝←wechat_oa/wechat_channels；腾讯混元←wechat_oa/wechat_channels；小红书点点←xiaohongshu。",
+          "已扫 4 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构",
+          "正文为功能名+一句话描述的营销罗列（『智能抠像 — 智能识别人像并抠除背景』），有列表感但无真正段落/表格组织，判 partial。"
+        ],
+        "checks": [
+          {
+            "id": "D2.paragraph_list_table",
+            "name": "段落/列表/表格语义结构",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "正文为功能名+一句话描述的营销罗列（『智能抠像 — 智能识别人像并抠除背景』），有列表感但无真正段落/表格组织，判 partial。",
+            "scoreImpact": -12.5
+          },
+          {
+            "id": "D2.faq_block",
+            "name": "FAQ / Q&A 块",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "已扫 4 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D2.micro_emphasis",
+            "name": "micro 强调节制度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "view-source 抽样以 route manifest 脚本为主，正文结论级强调无明确佐证，判 partial。",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.self_contained",
+            "name": "self-contained 自足性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "功能描述多为依赖功能网格语境的短片段（『多机位 — 4机位或9机位模式…』），独立引用价值有限，判 partial。",
+            "scoreImpact": -10
+          },
+          {
+            "id": "D2.css_stripped_readability",
+            "name": "删 CSS 可读性",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "文本/HTML 占比偏低（2.9%）",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.llms_txt",
+            "name": "/llms.txt 存在性与格式",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "/llms.txt 存在但格式不完整（缺 H1 或链接）",
+            "scoreImpact": -5
+          },
+          {
+            "id": "china.platform_reachability",
+            "name": "内容平台覆盖 vs LLM 可达性盲区（§6.3）",
+            "tier": "L",
+            "status": "partial",
+            "scoreImpact": -10,
+            "evidence": "盲区引擎（内容完全抓不到）：小红书点点(P3)。仅间接可达：豆包(P0)、腾讯元宝(P0)、腾讯混元(P2)。整改方向：豆包←douyin/toutiao；腾讯元宝←wechat_oa/wechat_channels；腾讯混元←wechat_oa/wechat_channels；小红书点点←xiaohongshu。"
+          }
+        ]
+      },
+      "D3": {
+        "score": 0,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "已扫 5 条内部链接 + 4 页 JSON-LD，未发现 About/机构页或 Organization schema",
+          "无任何作者署名，仅页脚公司主体（深圳市脸萌科技/字节跳动），E-E-A-T 作者资质信号缺失，判 poor。"
+        ],
+        "checks": [
+          {
+            "id": "D3.about_page",
+            "name": "About / 机构信息存在性",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "已扫 5 条内部链接 + 4 页 JSON-LD，未发现 About/机构页或 Organization schema",
+            "scoreImpact": -25
+          },
+          {
+            "id": "D3.author_credentials",
+            "name": "作者 / 资质标注",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "无任何作者署名，仅页脚公司主体（深圳市脸萌科技/字节跳动），E-E-A-T 作者资质信号缺失，判 poor。",
+            "scoreImpact": -30
+          },
+          {
+            "id": "D3.freshness",
+            "name": "内容时间新鲜度",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "未检测到内容时间信息（已扫数字与英文自然语言日期）",
+            "scoreImpact": -20
+          },
+          {
+            "id": "D3.transparency",
+            "name": "透明度（来源/披露/政策）",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "有合规披露（用户协议/隐私协议、营业执照、ICP备案、增值电信许可、商务联系），但纯产品营销无内容来源/信息披露，判 partial。",
+            "scoreImpact": -12.5
+          }
+        ]
+      },
+      "D4": {
+        "score": 40,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "纯功能断言无论证支撑（『电影级质感』『录音棚音质』等主张无论据/依据），论点-论据-依据链缺失，判 poor。",
+          "仅 1 处具体数字，统计支撑偏弱"
+        ],
+        "checks": [
+          {
+            "id": "D4.statistics_usage",
+            "name": "Statistics 使用率（具体数字/样本）",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "仅 1 处具体数字，统计支撑偏弱",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D4.citation_usage",
+            "name": "Cite / 引用来源使用率",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "检测到 0 处 cite/quote + 21 处外链引用",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.conclusion_clarity",
+            "name": "结论明确性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "营销主张清晰但泛化（『创作无限新可能』+ 功能卖点），无可引用的实质结论，判 partial。",
+            "scoreImpact": -12.5
+          },
+          {
+            "id": "D4.justification",
+            "name": "Justification 论证结构",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "纯功能断言无论证支撑（『电影级质感』『录音棚音质』等主张无论据/依据），论点-论据-依据链缺失，判 poor。",
+            "scoreImpact": -20
+          }
+        ]
+      },
+      "D5": {
+        "score": 100,
+        "weight": 0.1,
+        "partial": true,
+        "issues": [
+          "CWV 未取到（PageSpeed API 失败）"
+        ],
+        "checks": [
+          {
+            "id": "D5.robots_llm_bots",
+            "name": "robots.txt 对 LLM bot 的允许策略",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "robots.txt 未禁止任何已知 LLM bot（0 个有显式条目）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.https",
+            "name": "HTTPS / 证书",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全站 HTTPS",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.render_mode",
+            "name": "view-source 渲染模式（SSR vs CSR 空壳）",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "view-source 含实质内容（SSR/SSG，bot 可直接抓取）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.sitemap",
+            "name": "sitemap.xml 存在 + 覆盖",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "sitemap.xml 存在，含 1 个 URL",
+            "scoreImpact": 0
+          },
+          {
+            "id": "china.robots_cn_bots",
+            "name": "robots.txt 国内 bot 策略核查（§6.3）",
+            "tier": "L",
+            "status": "pass",
+            "scoreImpact": 0,
+            "evidence": "未发现封禁目标引擎相关国内 bot（已核查 Baiduspider / Bytespider / Sogou web spider / YisouSpider）。 注：平台原生内容（公众号/抖音/视频号）走平台索引，不受 robots 控制（§6.3 D5）。DeepSeek（博查）/ Kimi（自建/Bing 系）无稳定公开中文 bot UA，其开放 web 可达性依赖通用爬虫（Bingbot/Googlebot），robots 核查请并看国际 bot 清单。"
+          },
+          {
+            "id": "D5.cwv",
+            "name": "Core Web Vitals（PageSpeed Insights）",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "PageSpeed API 失败，CWV 未取到（PSI fetch 失败: fetch failed）",
+            "scoreImpact": 0
+          }
+        ]
+      }
+    },
+    "bonus": {
+      "applied": 3,
+      "cap": 8,
+      "signals": [
+        {
+          "id": "B.semantic_html",
+          "name": "语义化 HTML 结构",
+          "dimension": "D1",
+          "points": 1,
+          "evidence": "首页使用 4 种语义化标签（section/nav/header/footer）"
+        },
+        {
+          "id": "B.ssr_rich_content",
+          "name": "SSR 正文深度",
+          "dimension": "D2",
+          "points": 2,
+          "evidence": "view-source 含完整正文（约 1279 字符，SSR/SSG），bot 可直接抓取全文"
+        }
+      ]
+    }
+  },
+  "vetoes": [
+    {
+      "rule": "D5<60",
+      "triggered": false
+    },
+    {
+      "rule": "YMYL_D3<40",
+      "triggered": false
+    }
+  ],
+  "couplingFlags": [
+    {
+      "code": "D4xD2_micro",
+      "note": "micro 强调/语义偏弱，可引用单元难以被独立摘取"
+    }
+  ],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "nicheWarning": "当前 indicative 分数对 Niche 主体易虚高，Deep 审计可能触发 L2 封顶",
+  "topFixes": [
+    {
+      "priority": 1,
+      "dimension": "D4",
+      "method": "Statistics Addition",
+      "action": "核心结论补具体数字/样本量/时间窗口",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "low"
+    },
+    {
+      "priority": 2,
+      "dimension": "D4",
+      "method": "Quotation Addition",
+      "action": "段首给结论句（可被直接引用的明确表述）",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "mid"
+    },
+    {
+      "priority": 3,
+      "dimension": "D2",
+      "method": "llms.txt",
+      "action": "新增 /llms.txt（H1 + 站点定位 + 核心页链接）",
+      "rationale": "缺失明确 -10 分，零成本快赢",
+      "effort": "low"
+    }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "Niche 主体，Light 分易虚高，Deep 可能触发封顶；综合得分偏低，整改空间大，Deep 可精准定位优先项；D3 earned media 覆盖度 + D4 跨 query 稳定性未评，需 Deep 获得完整分数"
+}

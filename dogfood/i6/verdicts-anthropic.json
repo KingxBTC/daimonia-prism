@@ -1,0 +1,47 @@
+{
+  "url": "https://anthropic.com",
+  "market": "international",
+  "judge": "agent-judge (付龙/Claude Opus 4.8)",
+  "verdicts": [
+    {
+      "checkId": "D1.nav_clarity",
+      "rating": "good",
+      "evidence": "章节树清晰：最新发布、AI safety 核心观点（Core views/RSP/Constitution）、产品/模型/资源页脚分组自解释，LLM 易导航。"
+    },
+    {
+      "checkId": "D2.paragraph_list_table",
+      "rating": "partial",
+      "evidence": "首页以重复导航 chrome 为主（『Try Claude / Download app』多次重复），正文以发布卡短描述为主，meso 结构偏薄，判 partial。"
+    },
+    {
+      "checkId": "D2.micro_emphasis",
+      "rating": "partial",
+      "evidence": "view-source 抽样以 anti-flicker/intellimize 脚本为主，正文结论级强调无明确佐证，判 partial。"
+    },
+    {
+      "checkId": "D2.self_contained",
+      "rating": "partial",
+      "evidence": "发布卡描述可独立引用（『Claude Opus 4.8 — An upgrade to Opus across coding, agentic tasks…』），但首页大量被导航重复淹没，整体自足性受限，判 partial。"
+    },
+    {
+      "checkId": "D3.author_credentials",
+      "rating": "poor",
+      "evidence": "首页无具名作者署名（公司主体 public benefit corporation 描述，非内容作者资质），E-E-A-T 作者信号缺失，判 poor。"
+    },
+    {
+      "checkId": "D3.transparency",
+      "rating": "good",
+      "evidence": "政策/披露链接充分：Responsible Scaling Policy、Trust center、Transparency、Security and compliance、Terms and policies、Claude's Constitution，透明度信号强。"
+    },
+    {
+      "checkId": "D4.conclusion_clarity",
+      "rating": "partial",
+      "evidence": "标语明确（『AI research and products that put safety at the frontier』）、发布公告清晰，但首页偏公告流而非结论先行问答，判 partial。"
+    },
+    {
+      "checkId": "D4.justification",
+      "rating": "partial",
+      "evidence": "首页提出安全使命主张但作为 hub 外链展开论证，页面本身论点-论据-依据链不完整，判 partial。"
+    }
+  ]
+}

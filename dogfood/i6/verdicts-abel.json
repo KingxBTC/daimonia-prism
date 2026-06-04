@@ -1,0 +1,47 @@
+{
+  "url": "https://abel.ai",
+  "market": "international",
+  "judge": "agent-judge (付龙/Claude Opus 4.8)",
+  "verdicts": [
+    {
+      "checkId": "D1.nav_clarity",
+      "rating": "good",
+      "evidence": "章节树自解释、主题分块清晰：『From Text Tokens to Decision Tokens』下分 Search/Generative/Reasoning/Decision，配 live causal graph、papers 等小节，LLM 易抽取。"
+    },
+    {
+      "checkId": "D2.paragraph_list_table",
+      "rating": "good",
+      "evidence": "四时代框架（1998/2022/2024/2026）形成结构化对比，每段定义清晰，meso 结构良好，非堆砌。"
+    },
+    {
+      "checkId": "D2.micro_emphasis",
+      "rating": "partial",
+      "evidence": "view-source 抽样段以主题切换脚本为主，正文重点强调（结论级加粗）无明确佐证，判 partial。"
+    },
+    {
+      "checkId": "D2.self_contained",
+      "rating": "good",
+      "evidence": "各时代块自足可独立引用（『1998 Search — Google indexed the web…』『Decision Token: independent prior · time horizon · key drivers…』），不依赖上下文。"
+    },
+    {
+      "checkId": "D3.author_credentials",
+      "rating": "poor",
+      "evidence": "首页为产品 landing，虽提及『Two papers that shape the work』但无具名作者/团队资质署名，E-E-A-T 作者权威信号缺失，判 poor。"
+    },
+    {
+      "checkId": "D3.transparency",
+      "rating": "partial",
+      "evidence": "有方法论与可验证证据（PCMCI、live causal graph、『Real money. Real timestamps』、引用 papers），但缺少明确的来源/披露/政策标注，判 partial。"
+    },
+    {
+      "checkId": "D4.conclusion_clarity",
+      "rating": "good",
+      "evidence": "结论先行、可引用：『The world's largest live causal graph for financial markets』『200x beyond published SOTA』『Decision Token = …』，LLM 易摘一句话答案。"
+    },
+    {
+      "checkId": "D4.justification",
+      "rating": "good",
+      "evidence": "论证结构完整：四时代框架递进论点，主张配具体数据（200,000+ 变量、256.73 bps prior drift、0/11 retail systems）与 papers 作依据，论点-论据-依据齐全。"
+    }
+  ]
+}

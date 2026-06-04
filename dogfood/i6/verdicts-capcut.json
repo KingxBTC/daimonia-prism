@@ -1,0 +1,47 @@
+{
+  "url": "https://www.capcut.cn",
+  "market": "china",
+  "judge": "agent-judge (付龙/Claude Opus 4.8)",
+  "verdicts": [
+    {
+      "checkId": "D1.nav_clarity",
+      "rating": "partial",
+      "evidence": "仅 1 个 H1 + 3 个 H2（更多AI智能工具/专业剪辑/全能易用），章节树极浅，按功能类目分块但层级单薄，判 partial。"
+    },
+    {
+      "checkId": "D2.paragraph_list_table",
+      "rating": "partial",
+      "evidence": "正文为功能名+一句话描述的营销罗列（『智能抠像 — 智能识别人像并抠除背景』），有列表感但无真正段落/表格组织，判 partial。"
+    },
+    {
+      "checkId": "D2.micro_emphasis",
+      "rating": "partial",
+      "evidence": "view-source 抽样以 route manifest 脚本为主，正文结论级强调无明确佐证，判 partial。"
+    },
+    {
+      "checkId": "D2.self_contained",
+      "rating": "partial",
+      "evidence": "功能描述多为依赖功能网格语境的短片段（『多机位 — 4机位或9机位模式…』），独立引用价值有限，判 partial。"
+    },
+    {
+      "checkId": "D3.author_credentials",
+      "rating": "poor",
+      "evidence": "无任何作者署名，仅页脚公司主体（深圳市脸萌科技/字节跳动），E-E-A-T 作者资质信号缺失，判 poor。"
+    },
+    {
+      "checkId": "D3.transparency",
+      "rating": "partial",
+      "evidence": "有合规披露（用户协议/隐私协议、营业执照、ICP备案、增值电信许可、商务联系），但纯产品营销无内容来源/信息披露，判 partial。"
+    },
+    {
+      "checkId": "D4.conclusion_clarity",
+      "rating": "partial",
+      "evidence": "营销主张清晰但泛化（『创作无限新可能』+ 功能卖点），无可引用的实质结论，判 partial。"
+    },
+    {
+      "checkId": "D4.justification",
+      "rating": "poor",
+      "evidence": "纯功能断言无论证支撑（『电影级质感』『录音棚音质』等主张无论据/依据），论点-论据-依据链缺失，判 poor。"
+    }
+  ]
+}

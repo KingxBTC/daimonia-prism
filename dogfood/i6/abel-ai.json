@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "url": "https://abel.ai",
+    "market": "international",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-04T08:31:32.289Z",
+    "durationMs": 17921,
+    "sampledPages": [
+      "https://abel.ai/",
+      "https://abel.ai/about",
+      "https://abel.ai/blog/transformer-is-inherently-a-causal-learner",
+      "https://abel.ai/blog/autonomous-causal-analysis-agent"
+    ]
+  },
+  "profile": {
+    "domain": "abel.ai",
+    "businessType": "Abel Skills",
+    "isYMYL": false,
+    "nicheTier": "niche",
+    "siteScale": "<100",
+    "primaryLanguage": "en",
+    "geoMarket": "国际",
+    "targetEngines": [
+      "claude",
+      "chatgpt",
+      "gemini",
+      "perplexity",
+      "google_aio"
+    ]
+  },
+  "scores": {
+    "total": 78,
+    "level": "L2",
+    "indicative": true,
+    "dimensions": {
+      "D1": {
+        "score": 100,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [],
+        "checks": [
+          {
+            "id": "D1.jsonld_schema",
+            "name": "JSON-LD / schema.org 标注",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全部 4 个抽样页均有 schema.org 标注",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.heading_hierarchy",
+            "name": "H1-H4 层级一致性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "单一 H1 + 16 个标题层级清晰",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.nav_clarity",
+            "name": "章节树 / 导航清晰度",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "章节树自解释、主题分块清晰：『From Text Tokens to Decision Tokens』下分 Search/Generative/Reasoning/Decision，配 live causal graph、papers 等小节，LLM 易抽取。",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D2": {
+        "score": 60,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "已扫 4 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构",
+          "view-source 抽样段以主题切换脚本为主，正文重点强调（结论级加粗）无明确佐证，判 partial。"
+        ],
+        "checks": [
+          {
+            "id": "D2.paragraph_list_table",
+            "name": "段落/列表/表格语义结构",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "四时代框架（1998/2022/2024/2026）形成结构化对比，每段定义清晰，meso 结构良好，非堆砌。",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.faq_block",
+            "name": "FAQ / Q&A 块",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "已扫 4 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D2.micro_emphasis",
+            "name": "micro 强调节制度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "view-source 抽样段以主题切换脚本为主，正文重点强调（结论级加粗）无明确佐证，判 partial。",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.self_contained",
+            "name": "self-contained 自足性",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "各时代块自足可独立引用（『1998 Search — Google indexed the web…』『Decision Token: independent prior · time horizon · key drivers…』），不依赖上下文。",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.css_stripped_readability",
+            "name": "删 CSS 可读性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "删 CSS 后纯文本 6956 字，可读性良好",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D2.llms_txt",
+            "name": "/llms.txt 存在性与格式",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "/llms.txt 存在且含 H1 + 核心页链接",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D3": {
+        "score": 40,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "首页为产品 landing，虽提及『Two papers that shape the work』但无具名作者/团队资质署名，E-E-A-T 作者权威信号缺失，判 poor。",
+          "正文含数字日期但无结构化时间标注"
+        ],
+        "checks": [
+          {
+            "id": "D3.about_page",
+            "name": "About / 机构信息存在性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "检测到 About/机构信息（链接或 Organization schema）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D3.author_credentials",
+            "name": "作者 / 资质标注",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "首页为产品 landing，虽提及『Two papers that shape the work』但无具名作者/团队资质署名，E-E-A-T 作者权威信号缺失，判 poor。",
+            "scoreImpact": -30
+          },
+          {
+            "id": "D3.freshness",
+            "name": "内容时间新鲜度",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "正文含数字日期但无结构化时间标注",
+            "scoreImpact": -10
+          },
+          {
+            "id": "D3.transparency",
+            "name": "透明度（来源/披露/政策）",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "有方法论与可验证证据（PCMCI、live causal graph、『Real money. Real timestamps』、引用 papers），但缺少明确的来源/披露/政策标注，判 partial。",
+            "scoreImpact": -12.5
+          }
+        ]
+      },
+      "D4": {
+        "score": 80,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "仅 4 处具体数字，统计支撑偏弱"
+        ],
+        "checks": [
+          {
+            "id": "D4.statistics_usage",
+            "name": "Statistics 使用率（具体数字/样本）",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "仅 4 处具体数字，统计支撑偏弱",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D4.citation_usage",
+            "name": "Cite / 引用来源使用率",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "检测到 0 处 cite/quote + 24 处外链引用",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.conclusion_clarity",
+            "name": "结论明确性",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "结论先行、可引用：『The world's largest live causal graph for financial markets』『200x beyond published SOTA』『Decision Token = …』，LLM 易摘一句话答案。",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.justification",
+            "name": "Justification 论证结构",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "论证结构完整：四时代框架递进论点，主张配具体数据（200,000+ 变量、256.73 bps prior drift、0/11 retail systems）与 papers 作依据，论点-论据-依据齐全。",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D5": {
+        "score": 80,
+        "weight": 0.1,
+        "partial": true,
+        "issues": [
+          "robots.txt 禁止部分 LLM bot：ClaudeBot, GPTBot, Google-Extended",
+          "CWV 未取到（PageSpeed API 失败）"
+        ],
+        "checks": [
+          {
+            "id": "D5.robots_llm_bots",
+            "name": "robots.txt 对 LLM bot 的允许策略",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "robots.txt 禁止部分 LLM bot：ClaudeBot, GPTBot, Google-Extended",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D5.https",
+            "name": "HTTPS / 证书",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全站 HTTPS",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.render_mode",
+            "name": "view-source 渲染模式（SSR vs CSR 空壳）",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "view-source 含实质内容（SSR/SSG，bot 可直接抓取）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.sitemap",
+            "name": "sitemap.xml 存在 + 覆盖",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "sitemap.xml 存在，含 46 个 URL",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.cwv",
+            "name": "Core Web Vitals（PageSpeed Insights）",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "PageSpeed API 失败，CWV 未取到（PSI fetch 失败: fetch failed）",
+            "scoreImpact": 0
+          }
+        ]
+      }
+    },
+    "bonus": {
+      "applied": 8,
+      "cap": 8,
+      "signals": [
+        {
+          "id": "B.rich_schema",
+          "name": "schema 类型丰富度",
+          "dimension": "D1",
+          "points": 4,
+          "evidence": "检测到 7 种 schema.org 类型（WebSite/Organization/SoftwareApplication/CreativeWork/Offer…），结构化标注超出基础水平"
+        },
+        {
+          "id": "B.semantic_html",
+          "name": "语义化 HTML 结构",
+          "dimension": "D1",
+          "points": 2,
+          "evidence": "首页使用 6 种语义化标签（main/section/nav/header/footer/figure），利于 bot 切分内容"
+        },
+        {
+          "id": "B.ssr_rich_content",
+          "name": "SSR 正文深度",
+          "dimension": "D2",
+          "points": 2,
+          "evidence": "view-source 含完整正文（约 6956 字符，SSR/SSG），bot 可直接抓取全文"
+        }
+      ]
+    }
+  },
+  "vetoes": [
+    {
+      "rule": "D5<60",
+      "triggered": false
+    },
+    {
+      "rule": "YMYL_D3<40",
+      "triggered": false
+    }
+  ],
+  "couplingFlags": [
+    {
+      "code": "D1xD2_mismatch",
+      "note": "架构尚可但内容空"
+    }
+  ],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "nicheWarning": "当前 indicative 分数对 Niche 主体易虚高，Deep 审计可能触发 L2 封顶",
+  "topFixes": [
+    {
+      "priority": 1,
+      "dimension": "D4",
+      "method": "Statistics Addition",
+      "action": "核心结论补具体数字/样本量/时间窗口",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "low"
+    },
+    {
+      "priority": 2,
+      "dimension": "D3",
+      "method": "E-E-A-T",
+      "action": "作者页补资质/机构背景/外部权威背书",
+      "rationale": "YMYL 领域权威要求高，影响 D3",
+      "effort": "mid"
+    },
+    {
+      "priority": 3,
+      "dimension": "D2",
+      "method": "FAQ",
+      "action": "核心问题做结构化 FAQ 块（建议加 FAQPage schema）",
+      "rationale": "当前明确缺失，修复 ROI 高",
+      "effort": "low"
+    }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "Niche 主体，Light 分易虚高，Deep 可能触发封顶；D3 earned media 覆盖度 + D4 跨 query 稳定性未评，需 Deep 获得完整分数"
+}

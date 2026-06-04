@@ -1,0 +1,344 @@
+{
+  "meta": {
+    "url": "https://anthropic.com",
+    "market": "international",
+    "auditTier": "light",
+    "standardVersion": "geo_audit_standard v0.5.1",
+    "prismVersion": "1.0",
+    "timestamp": "2026-06-04T08:32:04.882Z",
+    "durationMs": 32461,
+    "sampledPages": [
+      "https://www.anthropic.com/",
+      "https://www.anthropic.com/news/servicenow-anthropic-claude",
+      "https://www.anthropic.com/news/services-track-partner-hub",
+      "https://www.anthropic.com/about-anthropic-interviewer"
+    ]
+  },
+  "profile": {
+    "domain": "anthropic.com",
+    "businessType": "Home \\ Anthropic",
+    "isYMYL": true,
+    "ymylCategory": "人身安全",
+    "nicheTier": "mid",
+    "siteScale": "100-1000",
+    "primaryLanguage": "en",
+    "geoMarket": "国际",
+    "targetEngines": [
+      "claude",
+      "chatgpt",
+      "gemini",
+      "perplexity",
+      "google_aio"
+    ]
+  },
+  "scores": {
+    "total": 55,
+    "level": "L1",
+    "indicative": true,
+    "dimensions": {
+      "D1": {
+        "score": 60,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "全站无 JSON-LD/schema.org 标注（已扫 4 页，0 命中）"
+        ],
+        "checks": [
+          {
+            "id": "D1.jsonld_schema",
+            "name": "JSON-LD / schema.org 标注",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "全站无 JSON-LD/schema.org 标注（已扫 4 页，0 命中）",
+            "scoreImpact": -40
+          },
+          {
+            "id": "D1.heading_hierarchy",
+            "name": "H1-H4 层级一致性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "单一 H1 + 23 个标题层级清晰",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D1.nav_clarity",
+            "name": "章节树 / 导航清晰度",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "章节树清晰：最新发布、AI safety 核心观点（Core views/RSP/Constitution）、产品/模型/资源页脚分组自解释，LLM 易导航。",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D2": {
+        "score": 20,
+        "weight": 0.2,
+        "partial": false,
+        "issues": [
+          "已扫 4 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构",
+          "GET /llms.txt → 不存在（-10）"
+        ],
+        "checks": [
+          {
+            "id": "D2.paragraph_list_table",
+            "name": "段落/列表/表格语义结构",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "首页以重复导航 chrome 为主（『Try Claude / Download app』多次重复），正文以发布卡短描述为主，meso 结构偏薄，判 partial。",
+            "scoreImpact": -12.5
+          },
+          {
+            "id": "D2.faq_block",
+            "name": "FAQ / Q&A 块",
+            "tier": "L",
+            "status": "fail",
+            "evidence": "已扫 4 页 JSON-LD + 首页正文，未发现 FAQPage schema 或问答结构",
+            "scoreImpact": -15
+          },
+          {
+            "id": "D2.micro_emphasis",
+            "name": "micro 强调节制度",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "view-source 抽样以 anti-flicker/intellimize 脚本为主，正文结论级强调无明确佐证，判 partial。",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.self_contained",
+            "name": "self-contained 自足性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "发布卡描述可独立引用（『Claude Opus 4.8 — An upgrade to Opus across coding, agentic tasks…』），但首页大量被导航重复淹没，整体自足性受限，判 partial。",
+            "scoreImpact": -10
+          },
+          {
+            "id": "D2.css_stripped_readability",
+            "name": "删 CSS 可读性",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "文本/HTML 占比偏低（1.7%）",
+            "scoreImpact": -7.5
+          },
+          {
+            "id": "D2.llms_txt",
+            "name": "/llms.txt 存在性与格式",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "GET /llms.txt → 不存在（-10）",
+            "scoreImpact": -10
+          }
+        ]
+      },
+      "D3": {
+        "score": 60,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "首页无具名作者署名（公司主体 public benefit corporation 描述，非内容作者资质），E-E-A-T 作者信号缺失，判 poor。",
+          "正文含英文自然语言日期但无结构化时间标注"
+        ],
+        "checks": [
+          {
+            "id": "D3.about_page",
+            "name": "About / 机构信息存在性",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "检测到 About/机构信息（链接或 Organization schema）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D3.author_credentials",
+            "name": "作者 / 资质标注",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "首页无具名作者署名（公司主体 public benefit corporation 描述，非内容作者资质），E-E-A-T 作者信号缺失，判 poor。",
+            "scoreImpact": -30
+          },
+          {
+            "id": "D3.freshness",
+            "name": "内容时间新鲜度",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "正文含英文自然语言日期但无结构化时间标注",
+            "scoreImpact": -10
+          },
+          {
+            "id": "D3.transparency",
+            "name": "透明度（来源/披露/政策）",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "政策/披露链接充分：Responsible Scaling Policy、Trust center、Transparency、Security and compliance、Terms and policies、Claude's Constitution，透明度信号强。",
+            "scoreImpact": 0
+          }
+        ]
+      },
+      "D4": {
+        "score": 40,
+        "weight": 0.25,
+        "partial": true,
+        "issues": [
+          "首页正文未检测到具体数字/统计量（0 处）",
+          "标语明确（『AI research and products that put safety at the frontier』）、发布公告清晰，但首页偏公告流而非结论先行问答，判 partial。"
+        ],
+        "checks": [
+          {
+            "id": "D4.statistics_usage",
+            "name": "Statistics 使用率（具体数字/样本）",
+            "tier": "L+D",
+            "status": "fail",
+            "evidence": "首页正文未检测到具体数字/统计量（0 处）",
+            "scoreImpact": -30
+          },
+          {
+            "id": "D4.citation_usage",
+            "name": "Cite / 引用来源使用率",
+            "tier": "L+D",
+            "status": "pass",
+            "evidence": "检测到 0 处 cite/quote + 391 处外链引用",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D4.conclusion_clarity",
+            "name": "结论明确性",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "标语明确（『AI research and products that put safety at the frontier』）、发布公告清晰，但首页偏公告流而非结论先行问答，判 partial。",
+            "scoreImpact": -12.5
+          },
+          {
+            "id": "D4.justification",
+            "name": "Justification 论证结构",
+            "tier": "L+D",
+            "status": "partial",
+            "evidence": "首页提出安全使命主张但作为 hub 外链展开论证，页面本身论点-论据-依据链不完整，判 partial。",
+            "scoreImpact": -10
+          }
+        ]
+      },
+      "D5": {
+        "score": 100,
+        "weight": 0.1,
+        "partial": true,
+        "issues": [
+          "CWV 未取到（PageSpeed API 失败）"
+        ],
+        "checks": [
+          {
+            "id": "D5.robots_llm_bots",
+            "name": "robots.txt 对 LLM bot 的允许策略",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "robots.txt 未禁止任何已知 LLM bot（7 个有显式条目）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.https",
+            "name": "HTTPS / 证书",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "全站 HTTPS",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.render_mode",
+            "name": "view-source 渲染模式（SSR vs CSR 空壳）",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "view-source 含实质内容（SSR/SSG，bot 可直接抓取）",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.sitemap",
+            "name": "sitemap.xml 存在 + 覆盖",
+            "tier": "L",
+            "status": "pass",
+            "evidence": "sitemap.xml 存在，含 436 个 URL",
+            "scoreImpact": 0
+          },
+          {
+            "id": "D5.cwv",
+            "name": "Core Web Vitals（PageSpeed Insights）",
+            "tier": "L",
+            "status": "partial",
+            "evidence": "PageSpeed API 失败，CWV 未取到（PSI fetch 失败: fetch failed）",
+            "scoreImpact": 0
+          }
+        ]
+      }
+    },
+    "bonus": {
+      "applied": 4,
+      "cap": 8,
+      "signals": [
+        {
+          "id": "B.semantic_html",
+          "name": "语义化 HTML 结构",
+          "dimension": "D1",
+          "points": 2,
+          "evidence": "首页使用 5 种语义化标签（main/section/nav/header/footer），利于 bot 切分内容"
+        },
+        {
+          "id": "B.ssr_rich_content",
+          "name": "SSR 正文深度",
+          "dimension": "D2",
+          "points": 2,
+          "evidence": "view-source 含完整正文（约 4370 字符，SSR/SSG），bot 可直接抓取全文"
+        }
+      ]
+    }
+  },
+  "vetoes": [
+    {
+      "rule": "D5<60",
+      "triggered": false
+    },
+    {
+      "rule": "YMYL_D3<40",
+      "triggered": false
+    }
+  ],
+  "couplingFlags": [
+    {
+      "code": "D1xD2_mismatch",
+      "note": "架构尚可但内容空"
+    },
+    {
+      "code": "D4xD2_micro",
+      "note": "micro 强调/语义偏弱，可引用单元难以被独立摘取"
+    }
+  ],
+  "notEvaluated": [
+    "D3 earned media 覆盖度（需 Deep）",
+    "D4 跨 query 稳定性 WCP/DR/WTR（需 Deep）",
+    "引擎特定层 per-engine 分数（需 Deep）",
+    "异常引用模式抽查（需 Deep）"
+  ],
+  "topFixes": [
+    {
+      "priority": 1,
+      "dimension": "D4",
+      "method": "Statistics Addition",
+      "action": "核心结论补具体数字/样本量/时间窗口",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "low"
+    },
+    {
+      "priority": 2,
+      "dimension": "D4",
+      "method": "Quotation Addition",
+      "action": "段首给结论句（可被直接引用的明确表述）",
+      "rationale": "GEO 9 方法 ROI 最高，引用可见性提升显著",
+      "effort": "mid"
+    },
+    {
+      "priority": 3,
+      "dimension": "D2",
+      "method": "llms.txt",
+      "action": "新增 /llms.txt（H1 + 站点定位 + 核心页链接）",
+      "rationale": "缺失明确 -10 分，零成本快赢",
+      "effort": "low"
+    }
+  ],
+  "deepAuditRecommended": true,
+  "deepAuditRationale": "YMYL 领域，权威性 earned media 需 Deep 实测；综合得分偏低，整改空间大，Deep 可精准定位优先项；D3 earned media 覆盖度 + D4 跨 query 稳定性未评，需 Deep 获得完整分数"
+}
