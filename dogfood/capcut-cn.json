@@ -5,8 +5,8 @@
     "auditTier": "light",
     "standardVersion": "geo_audit_standard v0.5.1",
     "prismVersion": "1.0",
-    "timestamp": "2026-06-04T06:47:43.958Z",
-    "durationMs": 16668,
+    "timestamp": "2026-06-04T07:14:04.660Z",
+    "durationMs": 18340,
     "sampledPages": [
       "https://www.capcut.cn/",
       "https://www.capcut.cn/mobile_portal",

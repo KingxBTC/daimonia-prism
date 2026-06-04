@@ -233,8 +233,8 @@
     "auditTier": "light",
     "standardVersion": "geo_audit_standard v0.5.1",
     "prismVersion": "1.0",
-    "timestamp": "2026-06-04T06:47:12.333Z",
-    "durationMs": 27737,
+    "timestamp": "2026-06-04T07:13:30.970Z",
+    "durationMs": 36430,
     "sampledPages": [
       "https://www.anthropic.com/",
       "https://www.anthropic.com/news/servicenow-anthropic-claude",
@@ -260,7 +260,7 @@
     ]
   },
   "scores": {
-    "total": 32,
+    "total": 37,
     "level": "L0",
     "indicative": true,
     "dimensions": {
@@ -359,21 +359,21 @@
         ]
       },
       "D3": {
-        "score": 0,
+        "score": 20,
         "weight": 0.25,
         "partial": true,
         "issues": [
-          "未检测到 About/机构/联系信息",
-          "（降级启发式）未经 LLM 确认作者资质，保守判 poor"
+          "（降级启发式）未经 LLM 确认作者资质，保守判 poor",
+          "未检测到内容时间信息"
         ],
         "checks": [
           {
             "id": "D3.about_page",
             "name": "About / 机构信息存在性",
             "tier": "L",
-            "status": "fail",
-            "evidence": "未检测到 About/机构/联系信息",
-            "scoreImpact": -25
+            "status": "pass",
+            "evidence": "检测到 About/机构信息（链接或 Organization schema）",
+            "scoreImpact": 0
           },
           {
             "id": "D3.author_credentials",

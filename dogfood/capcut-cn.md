@@ -1,5 +1,5 @@
 # 🔍 Prism GEO 审计报告（Light · indicative）
-**站点**：https://www.capcut.cn ｜ **市场**：china ｜ **标准**：geo_audit_standard v0.5.1 ｜ 2026-06-04T06:47:43.958Z
+**站点**：https://www.capcut.cn ｜ **市场**：china ｜ **标准**：geo_audit_standard v0.5.1 ｜ 2026-06-04T07:14:04.660Z
 
 ## 总览
 **37/100 · L0（严重不足）** ⚠️ indicative，Deep 审计后可能下调

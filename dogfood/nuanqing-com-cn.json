@@ -5,13 +5,13 @@
     "auditTier": "light",
     "standardVersion": "geo_audit_standard v0.5.1",
     "prismVersion": "1.0",
-    "timestamp": "2026-06-04T06:47:27.289Z",
-    "durationMs": 14954,
+    "timestamp": "2026-06-04T07:13:46.317Z",
+    "durationMs": 15345,
     "sampledPages": [
       "https://nuanqing.com.cn/",
       "https://nuanqing.com.cn/about/",
-      "https://nuanqing.com.cn/services/",
-      "https://nuanqing.com.cn/services/emotional/"
+      "https://nuanqing.com.cn/about/",
+      "https://nuanqing.com.cn/services/"
     ]
   },
   "profile": {
@@ -32,7 +32,7 @@
     ]
   },
   "scores": {
-    "total": 57,
+    "total": 59,
     "level": "L1",
     "indicative": true,
     "dimensions": {
@@ -203,7 +203,7 @@
             "name": "Cite / 引用来源使用率",
             "tier": "L+D",
             "status": "pass",
-            "evidence": "检测到 3 处 cite/quote + 18 处外链引用",
+            "evidence": "检测到 3 处 cite/quote + 23 处外链引用",
             "scoreImpact": 0
           },
           {
@@ -225,11 +225,10 @@
         ]
       },
       "D5": {
-        "score": 80,
+        "score": 100,
         "weight": 0.1,
         "partial": true,
         "issues": [
-          "sitemap.xml 存在但为空",
           "CWV 未取到（PageSpeed API 失败）"
         ],
         "checks": [
@@ -261,9 +260,9 @@
             "id": "D5.sitemap",
             "name": "sitemap.xml 存在 + 覆盖",
             "tier": "L",
-            "status": "partial",
-            "evidence": "sitemap.xml 存在但为空",
-            "scoreImpact": -10
+            "status": "pass",
+            "evidence": "sitemap.xml 存在，含 48 个 URL",
+            "scoreImpact": 0
           },
           {
             "id": "china.robots_cn_bots",

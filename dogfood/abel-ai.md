@@ -1,5 +1,5 @@
 # 🔍 Prism GEO 审计报告（Light · indicative）
-**站点**：https://abel.ai ｜ **市场**：international ｜ **标准**：geo_audit_standard v0.5.1 ｜ 2026-06-04T06:46:44.594Z
+**站点**：https://abel.ai ｜ **市场**：international ｜ **标准**：geo_audit_standard v0.5.1 ｜ 2026-06-04T07:12:54.538Z
 
 ## 总览
 **57/100 · L1（偏弱）** ⚠️ indicative，Deep 审计后可能下调
