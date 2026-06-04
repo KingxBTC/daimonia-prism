@@ -260,7 +260,8 @@ const D3_about: CheckDef = {
   tier: 'L', step: 'L5', penalty: 25, kind: 'rule',
   rule: (ctx): RuleOutcome => {
     const links = ctx.raw.pages.flatMap(p => p.internalLinks).map(l => l.toLowerCase());
-    const aboutSignal = links.some(l => /about|关于|联系|contact|公司|团队|team/.test(l));
+    // about-us/about_us 已被 about 子串覆盖；company/who-we-are 是权威站常用机构页（DAI-1322）
+    const aboutSignal = links.some(l => /about|company|who-we-are|关于|联系|contact|公司|团队|team/.test(l));
     const orgLd = ctx.raw.pages.some(p => p.jsonLd.some(b => /organization|localbusiness/i.test(JSON.stringify(b))));
     if (aboutSignal || orgLd) return { rating: 'good', evidence: '检测到 About/机构信息（链接或 Organization schema）' };
     return { rating: 'poor', evidence: '未检测到 About/机构/联系信息' };

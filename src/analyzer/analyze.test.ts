@@ -84,6 +84,34 @@ describe('analyze 集成', () => {
     assert.equal(r.topFixes[0].priority, 1);
   });
 
+  test('D3.about_page：仅 /company 链接（无 Organization schema）应 pass（DAI-1322 回归）', async () => {
+    // 权威站常用 /company 而非 /about；jsonLd 置空以隔离 about_page 链接信号，排除 orgLd 短路
+    const raw = makeRaw({
+      pages: [makePage({ jsonLd: [], internalLinks: ['https://www.anthropic.com/company'] })],
+    });
+    const r = await analyze(raw, { market: 'international', judge: goodJudge });
+    const about = r.dimensions.D3.checks.find(c => c.id === 'D3.about_page');
+    assert.equal(about?.status, 'pass', `/company 应被识别为 About 信号，实际 ${about?.status}`);
+  });
+
+  test('D3.about_page：/who-we-are 链接也应 pass（DAI-1322）', async () => {
+    const raw = makeRaw({
+      pages: [makePage({ jsonLd: [], internalLinks: ['https://example.com/who-we-are'] })],
+    });
+    const r = await analyze(raw, { market: 'international', judge: goodJudge });
+    const about = r.dimensions.D3.checks.find(c => c.id === 'D3.about_page');
+    assert.equal(about?.status, 'pass');
+  });
+
+  test('D3.about_page：无任何机构信号应 fail（负向对照，防过度放宽）', async () => {
+    const raw = makeRaw({
+      pages: [makePage({ jsonLd: [], internalLinks: ['https://example.com/pricing', 'https://example.com/blog'] })],
+    });
+    const r = await analyze(raw, { market: 'international', judge: goodJudge });
+    const about = r.dimensions.D3.checks.find(c => c.id === 'D3.about_page');
+    assert.equal(about?.status, 'fail');
+  });
+
   test('无页面 → 抛错（编排层应先处理 error 报告）', async () => {
     await assert.rejects(
       () => analyze(makeRaw({ pages: [] }), { market: 'international' }),
